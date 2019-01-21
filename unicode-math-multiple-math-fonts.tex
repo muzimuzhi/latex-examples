@@ -1,0 +1,21 @@
+\documentclass{article}
+\usepackage{unicode-math}
+\setmathfont{Latin Modern Math}
+\setmathfont{SourceHanSerif-Heavy}[range="002C]
+
+\input code-with-output
+
+\begin{document}
+
+\setcounter{tcb@cnt@example}{1}
+\begin{example}{Use multiple fonts for math formulae}
+%\usepackage{unicode-math}
+%\setmathfont{Latin Modern Math}
+%\setmathfont{SourceHanSerif-Heavy}[range="002C]
+
+\LARGE
+text mode: abc, def, xyz, 123 \par
+math mode: $(1,1) + (x, y)$ and $i = 1, 2, \dots, n$
+\end{example}
+
+\end{document}
