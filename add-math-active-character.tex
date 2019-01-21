@@ -1,0 +1,33 @@
+\documentclass{ctexart}
+\usepackage{amsmath}
+\usepackage{xcolor}
+
+\input code-with-output
+\begin{document}
+
+\begin{example}{Default output}
+%\documentclass{ctexart}
+%\usepackage{amsmath}
+
+text mode: english, comma 中文，逗号\par
+math mode: $(x, y)$ and $\text{中文，逗号}$
+\end{example}
+
+
+\setcounter{tcb@cnt@example}{3}
+\begin{example}[minted options app={breakafter=/}]{Make \texttt{","} active in math mode}
+%\usepackage{amsmath}
+
+\begingroup
+\catcode `\,=\active
+\gdef,{\mathpunct{\text{逗号}}}
+\endgroup
+\mathcode`\,="8000
+% ref: https://github.com/yuw/texmf-mathpunctspace/blob/master/tex/latex/mathpunctspace/mathpunctspace.sty#L83-L98
+
+\LARGE
+text mode: english, comma 中文，逗号\par
+math mode: $abc, abc$
+\end{example}
+
+\end{document}
