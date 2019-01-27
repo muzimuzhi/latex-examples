@@ -1,0 +1,24 @@
+\documentclass{article}
+\input code-with-output
+\begin{document}
+
+\begin{example*}{Nested tables}
+  \newcommand{\innerTable}{
+    % "@{}" inserts zero colume sep
+    \multicolumn{1}{|@{}c@{}|}{
+      % to exactly touch the outer table, inner table, as a cell of
+      % the outer, should be the widest/highest cell of column/row
+      \begin{tabular}{c|c}
+        a & content \\ \hline b & b
+      \end{tabular}
+    }
+  }
+  
+  \begin{tabular}{|c|c|}
+    \hline
+    content & content     \\ \hline
+    content & \innerTable \\ \hline
+  \end{tabular}
+\end{example*}
+
+\end{document}
