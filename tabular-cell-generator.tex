@@ -1,0 +1,163 @@
+\documentclass{article}
+\usepackage{expl3, xparse}
+\usepackage{pgffor}
+
+\input code-with-output
+%\newenvironment{example}[1]{begdef\par}{\par enddef\par}
+
+
+
+\ExplSyntaxOn
+\makeatletter
+\def\@cell@list{}
+\newcounter{cell}
+
+% #1 = begin num
+% #2 = end num
+% #3 = cell content
+\newcommand\latexRepeatCells[3]{
+  \let\@cell@list\@empty
+  \def\@cell@pre{#3}
+  \setcounter{cell}{#1}
+  \@whilenum \c@cell<#2 \do{
+    \expandafter\expandafter\expandafter\g@addto@macro
+    \expandafter\expandafter\expandafter\@cell@list
+    \expandafter\expandafter\expandafter{
+    \expandafter\@cell@pre
+    \expandafter{
+    \number\c@cell} &}
+    \stepcounter{cell}
+  }
+  \g@addto@macro\@cell@list{#3{#2}}
+  \@cell@list
+}
+
+\newcommand{\pgfRepeatCells}[3]{
+  \let\@cell@list\@empty
+  \g@addto@macro\@cell@list{#3{#1}}
+  \def\@cell@pre{& #3}
+  \setcounter{cell}{\numexpr#1+1\relax}
+  \foreach \i in {\arabic{cell}, ..., #2} {
+    \expandafter\expandafter\expandafter\g@addto@macro
+    \expandafter\expandafter\expandafter\@cell@list
+    \expandafter\expandafter\expandafter{
+    \expandafter\@cell@pre
+    \expandafter{
+    \i}}
+  }
+  \typeout{\@cell@list}
+  \@cell@list
+}
+
+\clist_new:N \l_cell_contents_clist
+
+\NewDocumentCommand \repeatCells { m m m }
+  {
+    \tl_clear:N \l_cell_contents_clist
+    \cs_set:Npn \@@_cell_contents:n ##1
+      { #3 { ##1 } }
+    \int_step_inline:nnnn { #1 } { 1 } { #2 }
+      {
+        \clist_put_right:No \l_cell_contents_clist 
+          { \@@_cell_contents:n { ##1 } }
+      }
+    \clist_use:Nn \l_cell_contents_clist { & }
+  }
+
+\int_new:N \l_cell_from_int
+\int_new:N \l_cell_to_int
+\int_new:N \l_cell_step_int
+\tl_new:N  \l_cell_text_tl
+\tl_new:N  \l_cell_loop_number_int
+
+\keys_define:nn { cell }
+  {
+    from .int_set:N = \l_cell_from_int,
+    to   .int_set:N = \l_cell_to_int,
+    step .int_set:N = \l_cell_step_int,
+    step .initial:n = 1,
+    text .code:n = 
+      {
+        \tl_set:Nn \l_cell_text_tl { #1 }
+        \tl_replace_all:Nnn \l_cell_text_tl 
+          { ... } { \l_cell_loop_number_int }
+      },
+    text .initial:n = \l_cell_loop_number_int
+  }
+
+% #1: clist
+% #2: <pre> | <pre>,<post> | ,<post>
+\NewDocumentCommand \forCells { o m }
+  {
+    \keys_set:nn { cell } { #1 }
+    \clist_clear:N \l_cell_contents_clist
+    \int_step_inline:nnnn
+      { \l_cell_from_int } 
+      { \l_cell_step_int } 
+      { \l_cell_to_int }
+      { \@@_cell_contents:nnn ##1,#2,,\relax }
+%    \clist_show:N \l_cell_contents_clist
+    \clist_use:Nn \l_cell_contents_clist { & }
+  }
+
+% #1 = num
+% #2 = pre
+% #3 = post
+% #4 = empty or ","
+% input : 
+%  - num,pre,,
+%  - num,,post,,
+%  - num,pre,post,,
+\cs_new:Npn \@@_cell_contents:nnn #1,#2,#3,#4\relax
+  { 
+    \tl_set:Nn \l_cell_loop_number_int { #1 }
+    \@@_push_cell_contents:xnn { \l_cell_text_tl } { #2 } { #3 }
+  }
+
+% #1 = num
+% #2 = pre
+% #3 = post
+\cs_new:Npn \@@_push_cell_contents:nnn #1#2#3
+  {
+    \clist_put_right:Nn \l_cell_contents_clist
+      { #2 { #1 } #3 }
+  }
+\cs_generate_variant:Nn \@@_push_cell_contents:nnn { xnn }
+
+\makeatother
+\ExplSyntaxOff
+\begin{document}
+
+\begin{example}{Different implementations}
+  \begin{tabular}{*{10}{|l}|}
+    \hline
+    x & x & \latexRepeatCells{1}{5}{arg } \\ \hline
+    x & \pgfRepeatCells{1}{6}{arg }       \\ \hline
+    \repeatCells{1}{7}{arg }              \\ \hline
+  \end{tabular}
+\end{example}
+
+\begin{example}{Final command - basic usage}
+  \begin{tabular}{*{10}{|l}|}
+    \hline
+    x & x & \forCells[from=1, to=4]{pre }               \\ \hline
+    x & \forCells[from=2, to=8, step=2]{pre , post} & x \\ \hline
+    \forCells[from=3, to=12, step=3]{, post}    & x & x \\ \hline
+  \end{tabular}
+\end{example}
+
+\begin{example}{Final command - advanced usage}
+  \makeatletter \let\toRomanLower\@roman \makeatother
+  \setlength\fboxsep{0.5pt}
+  \begin{tabular}{*{10}{|l}|}
+    \hline
+    \forCells[from=1, to=5]{format \textbf}             \\ \hline
+    \forCells[from=1, to=5]{format \toRomanLower}       \\ \hline
+    \forCells[from=1, to=5]{variable }                  \\ \hline
+    \forCells[from=1, to=5, text=0]{fixed \fbox}        \\ \hline
+    \forCells[from=1, to=5, text=z ... q]{mixed \fbox}  \\ \hline
+    \forCells[from=1, to=5, text=z ......]{mixed \fbox} \\ \hline
+  \end{tabular}
+\end{example}
+
+\end{document}
