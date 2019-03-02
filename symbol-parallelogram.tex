@@ -1,0 +1,23 @@
+\documentclass{article}
+\usepackage{unicode-math}
+\input code-with-output
+\begin{document}
+
+\begin{example*}{Type parallelogram 1 - use appropriate Unicode math fonts}
+  %\usepackage{unicode-math}
+  \setmathfont{STIX Math}
+  STIX Math: $ ▱ABCD, \parallelogram ABCD$ \par
+  \setmathfont{XITS Math}
+  XITS Math: $ ▱ABCD, \parallelogram ABCD$
+\end{example*}
+
+\begin{example*}{Type parallelogram 2 - use multiple Unicode math fonts}
+  %\usepackage{unicode-math}
+  \setmathfont{Latin Modern Math}
+  \setmathfont[range="25B1]{STIX Math}
+  STIX Math: $ ▱ABCD, \parallelogram ABCD$ \par
+  \setmathfont[range="25B1]{XITS Math}
+  XITS Math: $ ▱ABCD, \parallelogram ABCD$
+\end{example*}
+
+\end{document}
