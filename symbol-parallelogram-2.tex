@@ -1,0 +1,19 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{tikz}
+\input code-with-output
+\begin{document}
+
+\begin{example*}{Type parallelogram 3 - draw the symbol}
+  %\usepackage{amsmath}
+  %\usepackage{tikz}
+  %% ref: https://liam.page/2013/04/13/LaTeX-parallelogram/
+  \newcommand\parallelogram{%
+    \mathord{\text{%
+      \tikz[baseline] 
+        \draw ( 0em, .1ex)  -- ++( .9em, 0ex) -- 
+            ++(.2em, 1.2ex) -- ++(-.9em, 0ex) -- cycle;}}}
+  $\parallelogram ABCD$
+\end{example*}
+
+\end{document}
