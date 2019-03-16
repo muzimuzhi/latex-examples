@@ -9,12 +9,22 @@
 
 \setcounter{tcb@cnt@example}{2}
 \begin{example}{(Re)declare math symbol}
-%\DeclareSymbolFont{cnmath}{TU}{SongtiSC(0)}{m}{n}
-%\DeclareMathSymbol{,}{\mathpunct}{cnmath}{"2C}
-
-\LARGE
-text mode: english, comma 中文，逗号\par
-math mode: $abc, abc$
+  % \DeclareSymbolFont{cnmath}{TU}{SongtiSC(0)}{m}{n}
+  % \DeclareMathSymbol{,}{\mathpunct}{cnmath}{"2C}
+  
+  \LARGE
+  text mode: english, comma 中文，逗号\par
+  math mode: $abc, abc$
 \end{example}
+
+\begin{example*}{Print current font info}
+  % ref: https://tex.stackexchange.com/a/303536/79060
+  \newcommand{\printInternalCurrentFont}{%
+    \expandafter\ttfamily
+    \expandafter{\expandafter\string\the\font}%
+  }
+  
+  中文\printInternalCurrentFont
+\end{example*}
 
 \end{document}
