@@ -1,0 +1,38 @@
+\documentclass{ctexart}
+\usepackage{xcolor}
+% https://gist.github.com/muzimuzhi/d0df495a5e7356c00c893d5ab5ee9fbb
+\input code-with-output
+
+\begin{document}
+
+\begin{example}{Fake bold demo}
+  \def\fakeBold#1#2{%
+    \special{pdf:code 2 Tr 0 G #1 w}%
+    #2%
+    \special{pdf:code 0 Tr 0 G 0 w}%
+  }
+  \def\test#1{\fakeBold{#1}{你能吃玻璃吗}\par}
+  
+  \huge
+  \test{0} \test{.2} \test{.5} \test{1}
+\end{example}
+
+\begin{example}{Fake bold application: \texttt{\textbackslash CJKunderwave}}
+  \xeCJKsetup{
+    underwave/symbol=
+      \fontsize{0.5em}{0pt}\selectfont
+      \sixly \fakeBold{\char 58\relax},
+  }
+  \def\test#1{
+    \def\fakeBold##1{%
+      \special{pdf:code 2 Tr 0 G #1 w 1 J 0 0 1 RG}%
+      ##1%
+      \special{pdf:code 0 Tr 0 G 0 w 0 J 0 0 0 RG}}
+    Line width \texttt{#1}: \CJKunderwave{几个字}\par
+  }
+  
+  \large
+  \test{0.0} \test{0.2} \test{0.5} \test{1.0}
+\end{example}
+
+\end{document}
