@@ -18,16 +18,17 @@
 \end{example}
 
 \begin{example}{Fake bold application: \texttt{\textbackslash CJKunderwave}}
+  \def\fakeBold#1#2{%
+    \special{pdf:code q 2 Tr #1 w 1 J 0 0 1 RG 0 0 1 rg}%
+    #2%
+    \special{pdf:code Q}}%
   \xeCJKsetup{
     underwave/symbol=
       \fontsize{0.5em}{0pt}\selectfont
-      \sixly \fakeBold{\char 58\relax},
+      \sixly\fakeBold{\strokeWidth}{\char 58\relax}
   }
-  \def\test#1{
-    \def\fakeBold##1{%
-      \special{pdf:code q 2 Tr 0 G #1 w 1 J 0 0 1 RG}%
-      ##1%
-      \special{pdf:code Q}}%
+  \def\test#1{%
+    \def\strokeWidth{#1}%
     Line width \texttt{#1}: \CJKunderwave{几个字}\par
   }
   
