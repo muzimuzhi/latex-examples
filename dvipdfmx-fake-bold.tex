@@ -9,7 +9,6 @@
   \def\fakeBold#1#2{%
     \special{pdf:code q 2 Tr 0 G #1 w}%
     #2%
-%    \special{pdf:code 0 Tr 0 G 0 w}%
     \special{pdf:code Q}%
   }
   \def\test#1{\fakeBold{#1}{你能吃玻璃吗}\par}
@@ -28,9 +27,7 @@
     \def\fakeBold##1{%
       \special{pdf:code q 2 Tr 0 G #1 w 1 J 0 0 1 RG}%
       ##1%
-%      \special{pdf:code 0 Tr 0 G 0 w 0 J 0 0 0 RG}
-      \special{pdf:code Q}%
-    }
+      \special{pdf:code Q}}%
     Line width \texttt{#1}: \CJKunderwave{几个字}\par
   }
   
