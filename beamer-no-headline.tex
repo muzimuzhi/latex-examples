@@ -1,0 +1,37 @@
+\documentclass[12pt]{beamer}
+\usetheme{Warsaw}
+\usepackage{lipsum}
+\begin{document}
+\section{Section I}
+
+{%
+    \setbeamertemplate{headline}{}
+    \vspace*{-1.04cm}
+    \begin{frame}
+    \frametitle{title}
+    {\Large Use magic number \texttt{1.04cm}}\par\lipsum[2]
+    \end{frame}
+}
+
+{%
+    \setbeamertemplate{headline}{}
+    \makeatletter
+    \vspace*{-\dimexpr\headheight+\f@size pt\relax}
+    \makeatother
+    \begin{frame}
+    \frametitle{title}
+    {\Large Use calculations}\par\lipsum[2]
+    \end{frame}
+}
+
+\section{Section II}
+    \begin{frame}
+    \frametitle{title}\par\lipsum[2]
+    \end{frame}
+
+\section{Section III}
+\section{Section IV}
+    \begin{frame}
+    \frametitle{title}
+    \end{frame}
+\end{document}
