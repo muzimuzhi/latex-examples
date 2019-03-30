@@ -1,0 +1,47 @@
+\documentclass{article}
+\usepackage{tabto}
+\usepackage[scale=0.85]{geometry}
+
+\input{cc-icons-mapping}
+
+\ExplSyntaxOn
+\makeatletter
+
+\clist_const:Nn \c_ccicons_name_clist
+  {
+    %% round icons
+    cc-sa, cc-by, cc-cc, cc-nd, cc-nc-eu, cc-nc-jp, cc-sampling, cc-nc, cc-zero, cc-pd, cc-pd-alt, cc-remix, cc-share, 
+    %% license banners 
+    cc-srr, cc-BY, cc-logo, cc-by-nd, cc-by-nc-eu, cc-by-nc-nd-eu, cc-by-nc-sa-eu, cc-by-nc-jp, cc-by-nc-nd-jp, cc-by-nc-sa-jp, cc-by-nc-sa, cc-by-nc, cc-publication, cc-by-nc-nd, cc-by-sa, 
+    %% small banners
+    cc-ZERO-, cc-ONE-, cc-TWO-, cc-THREE-, cc-FOUR-, cc-FIVE-, cc-SIX-, cc-SEVEN-, cc-EIGHT-, cc-NINE-
+  }
+
+\NewDocumentCommand \printCcIcons { }
+  {
+    {\huge Usage: ~ \texttt{\textbackslash ccicons\{<icon~name>\}}} \par\bigskip
+    \clist_map_inline:Nn \c_ccicons_name_clist
+      {
+        \makebox[.49\textwidth][s]{{\Large\texttt{##1}} ~ \ccicons{##1}\quad}\tab
+      }
+  }
+
+\makeatother
+\ExplSyntaxOff
+
+\begin{document}
+\parindent=0pt
+
+%\Large\NumTabs{4}
+%% ref: https://github.com/cc-icons/cc-icons/blob/master/css/cc-icons.css
+%\makeatletter
+%\@tfor\icon:=abcdejmnopqrsABCDEFGJKLMNORS0123456789\do{%
+%  \texttt{\icon}: {\@cciconsFamily\icon}\tab
+%}
+%\makeatother
+
+\Huge\NumTabs{2}
+\printCcIcons
+
+\huge Font Download: \verb|https://creativecommons.org/|
+\end{document}
