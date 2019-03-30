@@ -1,0 +1,71 @@
+\usepackage{expl3}
+\usepackage{fontspec}
+\usepackage{xparse}
+
+\ExplSyntaxOn
+\makeatletter
+
+\newfontfamily\@cciconsFamily{cc-icons}
+
+\msg_set:nnn { ccicons } { invalid~name }
+  {
+    CC~Icon~with~name~``#1''~does~not~exist.~Use~``cc-cc''~instead.
+  }
+
+\NewDocumentCommand \ccicons { m }
+  {
+    \group_begin:
+    \@cciconsFamily
+    %% ref: https://github.com/cc-icons/cc-icons/blob/master/css/cc-icons.css
+    \str_case:nnF {#1}
+      {
+        %% round icons
+        {cc-sa}           {a}
+        {cc-by}           {b}
+        {cc-cc}           {c}
+        {cc-nd}           {d}
+        {cc-nc-eu}        {e}
+        {cc-nc-jp}        {j}
+        {cc-sampling}     {m}
+        {cc-nc}           {n}
+        {cc-zero}         {o}
+        {cc-pd}           {p}
+        {cc-pd-alt}       {q}
+        {cc-remix}        {r}
+        {cc-share}        {s}
+        %% license banners
+        {cc-srr}          {A}
+        {cc-BY}           {B}
+        {cc-logo}         {C}
+        {cc-by-nd}        {D}
+        {cc-by-nc-eu}     {E}
+        {cc-by-nc-nd-eu}  {F}
+        {cc-by-nc-sa-eu}  {G}
+        {cc-by-nc-jp}     {J}
+        {cc-by-nc-nd-jp}  {K}
+        {cc-by-nc-sa-jp}  {L}
+        {cc-by-nc-sa}     {M}
+        {cc-by-nc}        {N}
+        {cc-publication}  {O}
+        {cc-by-nc-nd}     {R}
+        {cc-by-sa}        {S}
+        %% small banners
+        {cc-ZERO-}        {0}
+        {cc-ONE-}         {1}
+        {cc-TWO-}         {2}
+        {cc-THREE-}       {3}
+        {cc-FOUR-}        {4}
+        {cc-FIVE-}        {5}
+        {cc-SIX-}         {6}
+        {cc-SEVEN-}       {7}
+        {cc-EIGHT-}       {8}
+        {cc-NINE-}        {9}
+      }{
+        \msg_error:nnn { ccicons } { invalid~name } {#1}
+        c
+      }
+    \group_end:
+  }
+
+\makeatother
+\ExplSyntaxOff
