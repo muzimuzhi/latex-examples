@@ -1,0 +1,73 @@
+\documentclass{article}
+\usepackage{calc}
+\usepackage[normalem]{ulem}
+\usepackage{xcolor}
+\usepackage{xparse}
+\usepackage{xpatch}
+
+% ref: https://www.webdesignrankings.com/resources/lolcolors/
+\definecolor{theme green} {HTML}{67D5B5}
+\definecolor{theme red}   {HTML}{EE7785}
+\definecolor{theme purple}{HTML}{C89EC4}
+\definecolor{theme blue}  {HTML}{84B1ED}
+
+\colorlet{float caption number}   {theme red}
+\colorlet{float caption seperator}{theme purple}
+\colorlet{float caption text}     {theme blue}
+
+\makeatletter
+\setlength\abovecaptionskip{0\p@}
+\setlength\belowcaptionskip{10\p@}
+
+\newlength\@strutTotalHeight
+\newlength\@strutDepth
+
+\settototalheight\@strutTotalHeight{\strut}
+\settodepth\@strutDepth{\strut}
+
+\ExplSyntaxOn
+\NewDocumentCommand{\highlight}{ O{yellow} }{%
+  \bgroup
+  \markoverwith
+    { 
+      \color{#1}
+      \rule[-\@strutDepth]{1pt}{\@strutTotalHeight}
+    }
+  \ULon
+}
+\ExplSyntaxOff
+
+\newcommand\@makeFloatCaption[2]{%
+  \highlight[float caption number]    {#1}%
+  \highlight[float caption seperator] {: }%
+  \highlight[float caption text]      {#2}%
+}
+
+\xpatchcmd{\@makecaption}
+  {#1: #2}
+  {\@makeFloatCaption{#1}{#2}}
+  {}
+  {\ddt}
+
+\xpatchcmd{\@makecaption}
+  {#1: #2}
+  {\@makeFloatCaption{#1}{#2}}
+  {}
+  {\ddt}
+
+\makeatother
+\begin{document}
+
+\begin{figure}[ht]
+  \centering
+  
+  \caption{Caption Title}
+    
+  \caption{Looooong long long long long long long long long long long long long long long long long long long Caption Title}
+  
+  Caption Number: \highlight[float caption number]{\qquad}, 
+  Caption Seperator: \highlight[float caption seperator]{\qquad},
+  Caption Text: \highlight[float caption text]{\qquad}
+\end{figure}
+
+\end{document}
