@@ -1,0 +1,136 @@
+\documentclass{beamer}
+\usepackage{xpatch}
+\usepackage{layouts}
+
+% config package `layouts`
+\printheadingsfalse
+\setlabelfont{\tiny}
+\setparametertextfont{\tiny}
+\setvaluestextsize{\scriptsize}
+\AtBeginDocument{
+  \setuplayouts
+  \setlayoutscale{0.3}
+}
+
+\makeatletter
+% % config package `layouts`, change inner dimens of \drawlist
+\renewcommand\l@yoneinch{40}
+\xpatchcmd\drawlist
+  {\l@youtvpi=40\relax}
+  {\l@youtvpi=40\relax}
+  {}{\ddt}
+
+% show changed value in red
+\xpatchcmd\listvalues
+  {\l@ycmd{itemsep}}
+  {\color{red}\l@ycmd{itemsep}}
+  {}{\ddt}
+  
+\xpatchcmd\listvalues
+  {\l@ycmd{itemindent}}
+  {\color{red}\l@ycmd{itemindent}}
+  {}{\ddt}
+
+% patch list env, insert templates "<list name> layout"
+\xpatchcmd\beamer@enum@
+  {\def\makelabel}
+  {\usebeamertemplate{enumerate layout}\def\makelabel}
+  {}{\ddt}
+
+\xpatchcmd\itemize
+  {\def\makelabel}
+  {\usebeamertemplate{itemize layout}\def\makelabel}
+  {}{\ddt}
+
+\xpatchcmd\@@description
+  {\let\makelabel}
+  {\usebeamertemplate{description layout}\let\makelabel}
+  {}{\ddt}
+
+% set templates "<list name> layout", use stange lengths on purpose
+
+% depth: \@enumdepth
+\setbeamertemplate{enumerate layout}{%
+  \ifnum \@enumdepth=1%
+    \itemsep=15.1234pt%
+    \itemindent=13.012pt%
+  \else
+    \itemsep=12.5678pt%
+    \itemindent=7.654pt%
+  \fi
+}
+
+% depth: \@itemdepth
+\setbeamertemplate{itemize layout}{%
+  \ifnum \@itemdepth=1%
+    \itemsep=15.1234pt%
+    \itemindent=13.012pt%
+  \else
+    \itemsep=12.5678pt%
+    \itemindent=7.654pt%
+  \fi
+}
+
+% depth: \@listdepth
+\setbeamertemplate{description layout}{%
+  \ifnum \@listdepth=1%
+    \itemsep=15.1234pt%
+    \itemindent=13.012pt%
+  \else
+    \itemsep=12.5678pt%
+    \itemindent=7.654pt%
+  \fi
+}
+
+% helper commands
+\newcommand\showDimen[1]{%
+  set \textbackslash\expandafter\@gobble\string#1 to \the#1%
+}
+
+\newcommand\showList[1]{%
+  \def\@envname@{#1}%
+  \def\@descriptionname@{description}%
+  \ifx\@envname@\@descriptionname@
+    \def\@@item@{\item[xx]}%
+  \else
+    \def\@@item@{\item}%
+  \fi
+  \textbf{#1} list environment:
+  \begin{#1}
+    \@@item@ level 1, \showDimen{\itemsep}, \showDimen{\itemindent}\\[3pt]
+    \listvalues
+
+    \@@item@ level 1
+    \begin{#1}
+      \@@item@ level 2, \showDimen{\itemsep}, \showDimen{\itemindent}\\[3pt]
+      \listvalues
+      
+      \@@item@ level 2
+    \end{#1}
+  \end{#1}
+}
+\makeatother
+
+
+\begin{document}
+
+\begin{frame}
+  \begin{enumerate}
+    \item layout of a list \currentlist
+    \drawlist
+  \end{enumerate}
+\end{frame}
+
+\begin{frame}
+  \showList{enumerate} 
+\end{frame}
+
+\begin{frame}
+  \showList{itemize} 
+\end{frame}
+
+\begin{frame}
+  \showList{description}
+\end{frame}
+
+\end{document}
