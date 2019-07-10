@@ -1,0 +1,69 @@
+\documentclass{article}
+\usepackage{amsmath}
+%\usepackage[pass, showframe]{geometry}
+\usepackage{tabularx}
+
+\input code-with-output
+\ifx\example\undefined
+  \newenvironment{example}{}{}
+\fi
+\begin{document}
+\def\key#1{\textsf{#1}}
+\def\vor{\mathrel{\,|\,}}
+\def\wideOr{\mathrel{\,\,|\,}}
+\def\note#1{\text{#1}}
+
+\begin{example}{Use \texttt{alignat}, two groups of formulae}
+  \begin{alignat*}{2}
+    &\key{app} (\lambda C, o) &&= \key{inst} (C, o) \\
+    &\key{app} ([k], o)       &&= [k\ o] 
+  \end{alignat*}
+  
+  \begin{alignat*}{2}
+    &\key{first} (n, m)   &&= n       \\
+    &\key{first} ([k])    &&= [k\ .1] \\
+    &\key{second} (n, m)  &&= m       \\
+    &\key{second} ([k])   &&= [k\ .2]
+  \end{alignat*}
+\end{example}
+
+\begin{example}{Use \texttt{alignat}, three groups of formulae}
+  \def\key#1{\textsf{#1}}
+  \def\vor{\mathrel{\,|\,}}
+  \def\wideOr{\mathrel{\,\,|\,}}
+  \def\note#1{\text{#1}}
+  
+  \begin{alignat*}{4}
+    &\Gamma, \Delta &\quad&::=&\quad& 
+        () \vor \Gamma, x : A &\mskip 60mu& \note{Contexts}    \\[10pt]
+    & t, u, A, B    &&::=     && 
+        x \vor \lambda x : A. t \vor t\ u \vor (x : A) \to B 
+                              && \note{Pi-types}    \\
+    &               &&\wideOr && 
+        (t, u) \vor t.1 \vor t.2 \vor (x : A) \times B 
+                              && \note{Sigma-types} \\
+    &               &&\wideOr &&
+        \key{0} \vor \key{s}\ u \vor \key{natrec}\ t\ u \vor \key{N}
+                              && \note{Natural numbers}
+  \end{alignat*}
+\end{example}
+
+\begin{example}{Use \texttt{tabu}, 4 columns}
+  \noindent
+  \setlength{\tabcolsep}{0pt}
+  \begin{tabularx}{\linewidth}{>{$}l<{$} >{$\quad}c<{\quad$} >{$}X<{$} l} 
+    \Gamma, \Delta & ::= &
+      () \vor \Gamma, x : A & Contexts           \\[10pt]
+    t, u, A, B     & ::= & 
+      x \vor \lambda x : A. t \vor t\ u \vor (x : A) \to B 
+                         & \note{Pi-types}    \\
+                   &\vor &
+      (t, u) \vor t.1 \vor t.2 \vor (x : A) \times B 
+                         & \note{Sigma-types} \\
+                   &\vor &
+      \key{0} \vor \key{s}\ u \vor \key{natrec}\ t\ u \vor \key{N}
+                         & \note{Natural numbers}
+  \end{tabularx}
+\end{example}
+
+\end{document}

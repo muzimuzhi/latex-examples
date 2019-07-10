@@ -1,0 +1,45 @@
+% ref: https://tex.stackexchange.com/a/24934/79060
+\documentclass{article}
+\usepackage{syntax}
+\input code-with-output
+\ifx\example\undefined
+  \newenvironment{example}{}{}
+\fi
+
+\begin{document}
+
+\setcounter{tcb@cnt@example}{3}
+\begin{example}[]{\texttt{syntax} pkg, default settings}
+  % \usepackage{syntax}
+  
+  \begin{grammar}
+    <statement> ::= <ident> `=' <expr> 
+    \alt `for' <ident> `=' <expr> `to' <expr> `do' <statement> 
+    \alt `{' <stat-list> `}' 
+    \alt <empty> 
+    
+    <stat-list> ::= <statement> `;' <stat-list> | <statement> 
+  \end{grammar}
+\end{example}
+\paragraph{}
+
+\begin{example}{\texttt{syntax} pkg, modified settings}
+  % \usepackage{syntax}
+  
+  \makeatletter
+  \setlength{\grammarparsep}{10pt plus 1pt minus 1pt}
+  \settowidth{\@tempdima}{\textit{<statement>}}
+  \addtolength{\grammarindent}{\@tempdima}
+  \makeatother
+  
+  \begin{grammar}
+    <statement> ::= <ident> `=' <expr> 
+                \alt `for' <ident> `=' <expr> `to' <expr> `do' <statement> 
+                \alt `{' <stat-list> `}' 
+                \alt <empty> 
+    
+    <stat-list> ::= <statement> `;' <stat-list> | <statement> 
+  \end{grammar}
+\end{example}
+
+\end{document}
