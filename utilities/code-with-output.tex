@@ -1,0 +1,69 @@
+\usepackage{tcolorbox}
+\usepackage{accsupp}  % PDF accessibility support
+
+\tcbuselibrary{skins, minted, xparse}
+
+% make line numbers unable to be selected
+% ref: https://liam.page/2013/11/04/LaTeX-listings-copy/
+\ExplSyntaxOn
+\newcommand\emptyaccsupp[1]{
+  \BeginAccSupp{ActualText={}} #1 \EndAccSupp{}
+}
+
+\renewcommand\theFancyVerbLine{
+  \emptyaccsupp{
+    \textcolor[rgb]{0.5, 0.5, 1.0}{
+      \scriptsize\arabic{FancyVerbLine}
+    }
+  }
+}
+\ExplSyntaxOff
+
+
+\tcbset{
+  minted options app/.style={
+    minted options/.append={#1}
+  }
+}
+
+
+% define new option
+\tcbset{
+  example options/.style={
+    skin=bicolor,
+    colbacklower=white,
+    fonttitle=\sffamily,
+    minted options app={
+      % line numbers
+      linenos,
+      numberfirstline=true,
+      stepnumber=2,
+      numbersep=5pt,
+      % break point
+      breakbefore=\\,
+    }
+  },
+  example title/.style 2 args={
+    title=Example \ifblank{#1}{}{ #1}\ifblank{#2}{}{: #2}
+  }
+}
+
+
+% new env: example
+% #1 - <kv list>, tcb-listing options
+% #2 - <token list>, title
+\makeatletter
+\NewTCBListing[auto counter]{example}{ O{} m }{
+  example options,
+  example title={\thetcbcounter}{#2},
+  #1
+}
+\makeatother
+
+% new env: example*
+% like example, except that it is un-numbered
+\NewTCBListing{example*}{ O{} m }{
+  example options,
+  example title={}{#2},
+  #1
+}
