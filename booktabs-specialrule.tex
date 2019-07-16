@@ -1,0 +1,46 @@
+\documentclass{article}
+\usepackage{booktabs}
+\input code-with-output
+\begin{document}
+
+\begin{example}{\texttt{booktabs} - regular usage}
+  \begin{tabular}{@{}lr@{}}
+    \toprule
+    a  & b   \\
+    \midrule
+    cc & dd  \\
+    ccc& ddd \\
+    \bottomrule
+  \end{tabular}
+\end{example}
+
+\begin{example}{\texttt{booktabs} - spitted vertical rules}
+  \begin{tabular}{|@{}l|r@{}|}
+    \toprule
+    a  & b   \\
+    \midrule
+    cc & dd  \\
+    ccc& ddd \\
+    \bottomrule
+  \end{tabular}
+\end{example}
+
+\begin{example}{\texttt{booktabs} - irregular usage, with v-rules}
+  \begin{tabular}{@{\hspace{3pt}}|l|r|@{\hspace{3pt}}}
+    \specialrule{.08em}{0pt}{0pt}
+    a  & b   \\
+    \specialrule{.05em}{0pt}{0pt}
+    cc & dd  \\
+    ccc& ddd \\
+    \specialrule{.08em}{0pt}{0pt}
+  \end{tabular}
+\end{example}
+
+\end{document}
+
+\specialrule{<rule width>}{<above space>}{<below space>}
+
+% equivalent usages
+\toprule    == \specialrule{.08em}{0pt} {.65ex}
+\midrule    == \specialrule{.05em}{.4ex}{.65ex}
+\bottomrule == \specialrule{.08em}{.4ex}{0pt}
