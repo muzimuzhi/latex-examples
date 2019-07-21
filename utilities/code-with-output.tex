@@ -19,13 +19,11 @@
 }
 \ExplSyntaxOff
 
-
+\makeatletter
 \tcbset{
-  minted options app/.style={
-    minted options/.append={#1}
-  }
+  minted options app/.code=\appto\kvtcb@minted@options{,#1}
 }
-
+\makeatother
 
 % define new option
 \tcbset{
