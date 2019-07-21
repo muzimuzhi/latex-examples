@@ -1,0 +1,62 @@
+\documentclass{ctexart}
+\usepackage{xpatch}
+\usepackage{xunicode-addon}
+
+\input code-with-output
+
+% set char class and font for circled numbers
+% ref: https://stone-zeng.github.io/2019-02-09-circled-numbers
+\xeCJKDeclareCharClass{Default}{"24EA, "2460->"2473, "3251->"32BF}
+\newfontfamily\EnclosedNumbers{Source Han Serif SC}
+
+% patch \textcircled
+\AtBeginUTFCommand[\textcircled]{\begingroup\EnclosedNumbers}
+\AtEndUTFCommand[\textcircled]{\endgroup}
+
+\begin{document}
+
+\makeatletter
+\def\thempfootnote{{\@arabic\c@mpfootnote}}
+\makeatother
+\begin{example}{Default footnote style}
+  abc\footnote{abc} def\footnote{def}
+\end{example}
+
+\makeatletter
+% add wrapper \textcircled,
+% adapted from latex.ltx, line 6380:
+\renewcommand\thefootnote{\textcircled{\@arabic\c@footnote}}
+
+% use separate footnote mark command
+\xpatchcmd\@makefntext
+  {\hb@xt@1.8em{\hss\@makefnmark}}
+  {\hb@xt@1.8em{\hss\@makefnmarkNormal}\space}
+  {}{\fail}
+
+% use non-suprescript style with lower baseline
+% adapted from latex.ltx, line 6383:
+\def\@makefnmarkNormal{\lower .3ex \hbox{\normalfont\@thefnmark}}
+
+% make footnote rule shorter
+\xpatchcmd\footnoterule
+  {.4\columnwidth}
+  {1in}
+  {}{\fail}
+\makeatother
+
+\makeatletter
+\def\thempfootnote{\textcircled{\@arabic\c@mpfootnote}}
+\let\c@footnote\c@mpfootnote
+\makeatother
+\begin{example}{One of Chinese footnote styles}
+  一二三\footnote{text}
+  
+  \addtocounter{footnote}{20}
+  四五六\footnote{text}
+  
+  \addtocounter{footnote}{20}
+  七八九\footnote{text}
+\end{example}
+
+
+\end{document}
