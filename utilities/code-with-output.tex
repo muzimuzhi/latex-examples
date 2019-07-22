@@ -21,6 +21,8 @@
 
 \makeatletter
 \tcbset{
+  % see tcbminted.code.tex, def of "minted options"
+  % minted options/.store in=\kvtcb@minted@options,
   minted options app/.code=\appto\kvtcb@minted@options{,#1}
 }
 \makeatother
