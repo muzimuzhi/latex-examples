@@ -1,0 +1,95 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage[mathlines]{lineno}
+\linenumbers
+\newcommand\test[2][a^2 + b^2 = c^2]{\texttt{
+  \textbackslash begin\{#2\}\space}
+  #1
+  \texttt{\space\textbackslash end\{#2\}}}
+
+% ref: https://tex.stackexchange.com/a/461192
+\usepackage{etoolbox} %% <- for \pretocmd, \apptocmd and \patchcmd
+
+%% Patch 'normal' math environment: (currently unused, but good to have)
+% \newcommand*\linenomathpatch[1]{%
+%   \expandafter\pretocmd\csname #1\endcsname {\linenomath}{}{\fail}%
+%   \expandafter\pretocmd\csname #1*\endcsname{\linenomath}{}{\fail}%
+%   \expandafter\apptocmd\csname end#1\endcsname {\endlinenomath}{}{\fail}%
+%   \expandafter\apptocmd\csname end#1*\endcsname{\endlinenomath}{}{\fail}%
+% }
+%% Patch AMS math environment:
+\newcommand*\linenomathpatchAMS[1]{%
+  \expandafter\pretocmd\csname #1\endcsname {\linenomathAMS}{}{\fail}%
+  \expandafter\pretocmd\csname #1*\endcsname{\linenomathAMS}{}{\fail}%
+  \expandafter\apptocmd\csname end#1\endcsname {\endlinenomath}{}{\fail}%
+  \expandafter\apptocmd\csname end#1*\endcsname{\endlinenomath}{}{\fail}%
+}
+
+%% Definition of \linenomathAMS depends on whether the mathlines option is provided
+\expandafter\ifx\linenomath\linenomathWithnumbers
+  \let\linenomathAMS\linenomathWithnumbers
+  %% The following line gets rid of an extra line numbers at the bottom:
+  \patchcmd\linenomathAMS
+    {\advance\postdisplaypenalty\linenopenalty}{}
+    {}{\fail}
+\else
+  \let\linenomathAMS\linenomathNonumbers
+\fi
+
+% \linenomathpatch{equation} %% <- unnecessary, equation is already patched
+\linenomathpatchAMS{gather}
+\linenomathpatchAMS{multline}
+\linenomathpatchAMS{align}
+\linenomathpatchAMS{alignat}
+\linenomathpatchAMS{flalign}
+
+\begin{document}
+\section{\LaTeXe{} displayed math environments}
+text text text text text text
+\[
+  \texttt{\textbackslash[\space} a^2 + b^2 = c^2 \texttt{\space\textbackslash]}
+\]
+text text text text text text
+\begin{displaymath}
+  \test{displaymath}
+\end{displaymath}
+text text text text text text
+\begin{equation}
+  \test{equation}
+\end{equation}
+text text text text text text
+\begin{eqnarray}
+  \test{eqnarray} \texttt{ (deprecated)}
+\end{eqnarray}
+text text text text text text
+\begin{linenomath}
+  $$
+    \texttt{\$\$\space} a^2 + b^2 = c^2 \texttt{\space\$\$ (inside linenomath env)}
+  $$
+\end{linenomath}
+
+\section{\texttt{amsmath} displayed math environments}
+text
+\begin{gather}
+  \test[\\ a_1=b_1+c_1 \\ a_2=b_2+c_2-d_2+e_2 \\]{gather}
+\end{gather}
+text
+\begin{multline}
+  \test[a^2 + b^2 + \\ c^2 + d^2 = S]{multline}
+  \\ (\text{extra equation number at the top)}
+\end{multline}
+text
+\begin{align}
+  \test[{a_1 &= b_1+c_1 \\ a_2 &= b_2+c_2-d_2+e_2}]{align}
+\end{align}
+text
+\begin{alignat}{2}
+  \test[{a_1 &= b_1+c_1 &\qquad&(note1)\\ a_2 &= b_2+c_2-d_2+e_2 &&(note2)}]{alignat}
+\end{alignat}
+text
+\begin{flalign}
+  \test[{x&=y & X&=Y \\ x'&=y' & X'&=Y'}]{flalign}
+\end{flalign}
+
+
+\end{document}
