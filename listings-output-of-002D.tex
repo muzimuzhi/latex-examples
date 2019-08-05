@@ -1,0 +1,120 @@
+\documentclass{article}
+\usepackage{fontspec}
+\usepackage{listings}
+\lstset{gobble=2}
+
+\input code-with-output
+\begin{document}
+
+\begin{example}{\texttt{listings} - default style}
+  \begin{lstlisting}[language=pascal]
+    for i:=maxint to 0 do
+    begin
+        { do nothing }
+    end;
+    
+    Write('Case insensitive ');
+    WritE('Pascal keywords.');
+  \end{lstlisting}
+\end{example}
+
+\begin{example}{\texttt{listings} - configured style}
+  \begin{lstlisting}[language=pascal, basicstyle=\ttfamily]
+    for i:=maxint to 0 do
+    begin
+        { do nothing }
+    end;
+    
+    Write('Case insensitive ');
+    WritE('Pascal keywords.');
+  \end{lstlisting}
+\end{example}
+
+\begin{example}[text only]{\texttt{listings} - compare output with standard \texttt{verbatim} env, \texttt{\textbackslash rmfamily}}
+  \texttt{lstlisting}:
+  \begin{lstlisting}[columns=flexible]
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    abcdefghijklmnopqrstuvwxyz
+    @$_
+    0123456789
+    !"#%&'()*+,-./:;<=>?
+    [\]^{|}~
+  \end{lstlisting}
+  
+  \makeatletter
+  \renewcommand\verbatim@font{\normalfont\rmfamily}
+  \makeatother
+  
+  \texttt{verbatim}:
+  \begin{verbatim}
+  ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  abcdefghijklmnopqrstuvwxyz
+  @$_
+  0123456789
+  !"#%&'()*+,-./:;<=>?
+  [\]^{|}~
+  \end{verbatim}
+\end{example}
+
+\begin{example}[text only]{\texttt{listings} - compare output with standard \texttt{verbatim} env, \texttt{\textbackslash ttfamily}}
+  \texttt{lstlisting}:
+  \begin{lstlisting}[columns=flexible, basicstyle=\ttfamily]
+    ABCDEFGHIJKLMNOPQRSTUVWXYZ
+    abcdefghijklmnopqrstuvwxyz
+    @$_
+    0123456789
+    !"#&'()*+,-./:;<=>?%
+    [\]^{|}~
+  \end{lstlisting}
+  
+  \texttt{verbatim}:
+  \begin{verbatim}
+  ABCDEFGHIJKLMNOPQRSTUVWXYZ
+  abcdefghijklmnopqrstuvwxyz
+  @$_
+  0123456789
+  !"#&'()*+,-./:;<=>?%
+  [\]^{|}~
+  \end{verbatim}
+\end{example}
+
+\begin{example}{listings - compare output style of ``-" symbol}
+  \newfontfamily\mono{Source Code Pro}
+  \mono
+  
+  text mode: +-    \par
+  math mode: $+-$  \par
+  \ lst mode: \lstinline|+-|
+\end{example}
+
+\begin{example}[text only]{listings - change output style of ``-" symbol}
+  \newfontfamily\mono{Source Code Pro}
+  
+  \makeatletter
+  \def\useMono{\lst@AddToHook{OnNewLine}{\mono}}
+  \def\useRoman{\gdef\lsthk@OnNewLine{\rmfamily}} % clear hook
+  \makeatother
+  
+  Before patch:
+  \begin{lstlisting}[escapechar=\%]
+    \rmfamily: i++, 1 + 2  j--, 1 - 2%\useMono%
+        \mono: i++, 1 + 2  j--, 1 - 2
+  \end{lstlisting}
+
+  \makeatletter
+  % https://tex.stackexchange.com/a/424193
+  % see also `texdoc listings-devel`, sec. 13.3.1
+  \lst@CCPutMacro
+      \lst@ProcessOther{"2D}{-{}}
+      \@empty\z@\@empty
+  \makeatother
+  
+  \useRoman
+  After patch:
+  \begin{lstlisting}[escapechar=\%]
+    \rmfamily: i++, 1 + 2  j--, 1 - 2%\useMono%
+        \mono: i++, 1 + 2  j--, 1 - 2
+  \end{lstlisting}
+\end{example}
+
+\end{document}
