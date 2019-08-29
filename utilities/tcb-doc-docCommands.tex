@@ -1,0 +1,115 @@
+\RequirePackage{tcolorbox}
+\tcbuselibrary{documentation}
+
+\ExplSyntaxOn
+\makeatletter
+
+% #1 = tcb options
+% #2 = clist of 3-tuple, "{name}{arg}{desc}, {}{}{}, ..."
+\NewDocumentEnvironment{docCommands}{ O{} m }
+  {
+    \tcbset{#1}
+    \begin{tcb@manual@entry}
+    \tcb_doc_heads:n {#2}
+    \nobreak\tcbset{before~ upper=}
+    \kvtcb@doc@body@command@before
+    \ignorespaces
+  }
+  {
+    \ifvmode\else\unskip\fi
+    \kvtcb@doc@body@command@after
+    \end{tcb@manual@entry}
+  }
+
+% to use \seq_pop_right:NN
+\seq_new:N \l_tcb_heads_seq
+
+% #1 = clist of 3-tuple, "{csname}{arg}{desc}, {}{}{}, ..."
+\cs_new:Nn \tcb_doc_heads:n
+  {
+    \seq_set_from_clist:Nn \l_tcb_heads_seq {#1}
+    \seq_pop_left:NN \l_tcb_heads_seq \l_tmpa_tl
+    \exp_after:wN \tcb_doc_head:nnnn \l_tmpa_tl 
+      {after~ skip=0pt, enlarge~ bottom~ by=0pt}
+    \seq_pop_right:NN \l_tcb_heads_seq \l_tmpa_tl
+    \seq_map_inline:Nn \l_tcb_heads_seq
+      {
+        \tcb_doc_head:nnnn ##1 
+          {before~ skip=0pt, after~ skip=0pt, enlarge~ bottom~ by=0pt}
+      }
+    \exp_after:wN \tcb_doc_head:nnnn \l_tmpa_tl 
+      {before~ skip=0pt, enlarge~ bottom~ by=-0.2\baselineskip}
+  }
+
+% #1 = command csname
+% #2 = arg spec
+% #3 = command description
+% #4 = tcb options
+\cs_new:Nn \tcb_doc_head:nnnn
+  {
+    \begin{tcb@doc@head}{doc@head@command, #4}
+    \strut
+    \tcb@Print@Com{#1}\tcb@index@Com{#1}
+    \protected@edef\@currentlabel{\noexpand\tcb@cs{#1}}\label{com:#1}
+    {\ttfamily #2}
+    \gdef\kvtcb@doc@description{#3}%  result of \tcbset{doc description=#3}
+    \tcb@doc@do@description
+    \end{tcb@doc@head}
+  }
+
+\makeatother
+\ExplSyntaxOff
+
+\endinput
+
+% usage
+\begin{docCommands}
+{
+  {menu}
+    {\oarg{input sep}\marg{menu sequence}}
+    {\oarg{input sep} defaults to |>|},
+  {directory}
+    {\oarg{input sep}\marg{menu sequence}}
+    {\oarg{input sep} defaults to |/|},
+  {keys}
+    {\oarg{input sep}\marg{menu sequence}}
+    {\oarg{input sep} defaults to |+|}
+}
+  content
+\end{docCommands}
+
+%% ----------------------------
+%% begin: original definitions
+%%   from tcbdocumentation.code.tex
+%%   link https://github.com/T-F-S/tcolorbox/blob/master/tex/latex/tcolorbox/tcbdocumentation.code.tex
+%% ----------------------------
+
+%\newenvironment{docCommand}[3][]{\tcbset{#1}%
+%  \begin{tcb@manual@entry}%
+%  \begin{tcb@doc@head}{doc@head@command}%
+%  \tcb@Print@Com{#2}\tcb@index@Com{#2}\protected@edef\@currentlabel{\noexpand\tcb@cs{#2}}\label{com:#2}{\ttfamily #3}%
+%  \tcb@doc@do@description%
+%  \end{tcb@doc@head}\nobreak\tcbset{before upper=}\kvtcb@doc@body@command@before\ignorespaces}%
+%  {\ifvmode\else\unskip\fi\kvtcb@doc@body@command@after\end{tcb@manual@entry}}
+%
+%\newenvironment{tcb@manual@entry}{\begin{list}{}{%
+%  \setlength{\leftmargin}{\kvtcb@doc@left}%
+%  \setlength{\itemindent}{0pt}%
+%  \setlength{\itemsep}{0pt}%
+%  \setlength{\parsep}{0pt}%
+%  \setlength{\rightmargin}{\kvtcb@doc@right}%
+%  }\item}{\end{list}}
+%
+%\newtcolorbox{tcb@doc@head}[1]{blank,colback=white,colframe=white,
+%  code={\tcbdimto\tcb@temp@grow@left{-\kvtcb@doc@indentleft}%
+%        \tcbdimto\tcb@temp@grow@right{-\kvtcb@doc@indentright}},
+%  grow to left by=\tcb@temp@grow@left,%
+%  grow to right by=\tcb@temp@grow@right,
+%  sidebyside,sidebyside align=top,
+%  sidebyside gap=-\tcb@w@upper@real,
+%  phantom=\phantomsection,%
+%  enlarge bottom by=-0.2\baselineskip,#1}
+
+%% ----------------------------
+%% end: original definitions
+%% ----------------------------
