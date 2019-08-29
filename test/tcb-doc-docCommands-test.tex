@@ -1,0 +1,52 @@
+\PassOptionsToPackage{hyperindex,colorlinks}{hyperref}
+\documentclass{article}
+\usepackage[documentation]{tcolorbox}
+\usepackage{shortvrb}
+\usepackage{lipsum}
+
+\tcbset{
+  skin=enhanced,
+  doc head={colback=yellow!10!white,interior style=fill},
+  doc head key={colback=magenta!5!white,interior style=fill},
+  color key=DarkViolet,
+  color value=Teal,
+  color color=Teal,
+  color counter=Orange!85!black,
+  color length=Orange!85!black,
+  index colorize,
+  index annotate,
+}
+
+\MakeShortVerb{\|}
+
+\input tcb-doc-docCommands
+
+\begin{document}
+\section{Basic env, large vskip between \texttt{docCommand}}
+\begin{docCommand}[doc description=\oarg{input sep} defaults to |>|]
+  {menu}
+  {\oarg{input sep}\marg{menu sequence}}
+\end{docCommand}
+
+\begin{docCommand}{directory}{\oarg{input sep}\marg{menu sequence}}
+%  \oarg{input sep} defaults to ||
+\end{docCommand}
+
+\begin{docCommand}{keys}{\oarg{input sep}\marg{menu sequence}}
+\end{docCommand}
+
+\section{New env, no vskip}
+\begin{docCommands}{
+  {menu}
+    {\oarg{input sep}\marg{menu sequence}}
+    {\oarg{input sep} defaults to |>|},
+  {directory}
+    {\oarg{input sep}\marg{menu sequence}}
+    {\oarg{input sep} defaults to |/|},
+  {keys}
+    {\oarg{input sep}\marg{menu sequence}}
+    {\oarg{input sep} defaults to |+|}}
+  \lipsum[1]
+\end{docCommands}
+
+\end{document}
