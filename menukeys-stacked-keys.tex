@@ -1,0 +1,60 @@
+\documentclass{article}
+\usepackage{menukeys}
+
+\input code-with-output
+
+\begin{document}
+
+\begin{example}{\texttt{menukeys} - demos}
+  % \usepackage{menukeys}
+  
+  % change style
+  \renewmenumacro\directory[/]{pathswithfolder}
+  
+  \newcommand\toCmd[1]{\texttt{\textbackslash #1}}
+  \begin{tabular}{rl}
+  	     \toCmd{menu} & \menu{Extras > Settings > Rulers}      \\
+  	     \toCmd{keys} & \keys{cmd + R}                         \\
+  	\toCmd{directory} & \directory{/Users/Your Name/Documents}
+  \end{tabular}
+\end{example}
+
+\makeatletter
+\newcommand\tw@stackedKeys@yshift{0.3ex}
+
+% based on codes in menukeys.sty
+% based on "\tikzset{tw@roundedkeys@base/.style={...}}"
+\tikzset{
+  tw@roundedStackedKeys@base/.style={
+    tw@roundedkeys@base,
+    % change text alignment, use smaller font size
+    text height = 1.825ex + \tw@stackedKeys@yshift,
+    text depth  =  .7ex   - \tw@stackedKeys@yshift,
+    font        = \sffamily\tiny\linespread{0.85}\selectfont,
+    align       = center
+  }
+}
+
+% based on "\tw@declare@style@simple*{roundedkeys}{...}"
+\tw@declare@style@simple*{roundedStackedKeys}{%
+  \tikz[baseline={($ (tw@node.base) + (0, -0.2ex + \tw@stackedKeys@yshift) $)}] {% add yshift
+    \node (tw@node) [tw@roundedStackedKeys@base]% use new style
+      {\strut\color{\usemenucolor{txt}}\CurrentMenuElement};%
+  }%
+}[%
+  \hspace{0.1em plus 0.1em minus 0.05em}%
+  \textcolor{\usemenucolor{b}}{\raisebox{0.25ex}{\sffamily\relsize{-2}+}}%
+  \hspace{0.1em plus 0.1em minus 0.05em}%
+]{gray}
+
+\newmenumacro\stackedKeys[+]{roundedStackedKeys}
+\makeatother
+
+\begin{example}{\texttt{menukeys} - new command \texttt{\textbackslash stackedKeys}}
+  % \usepackage{menukeys}
+  
+  \stackedKeys{<\\, + >\\. + \&\\7 + \~{}\\\texttt{`}} vs 
+  \keys       {<    + >    + \&    + `~{}}
+\end{example}
+
+\end{document}
