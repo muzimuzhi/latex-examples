@@ -1,0 +1,61 @@
+\documentclass{article}
+\usepackage{etoolbox}
+\usepackage{fancyvrb}
+\usepackage{hyperref}
+
+%%
+%% make \ref to line numbers jump to right position
+%%
+\makeatletter
+\let\FV@refstepcounter\refstepcounter
+
+% move \FV@StepLineNo into \FV@ListProcessLine
+\patchcmd\FV@@PreProcessLine
+  {\FV@StepLineNo}
+  {}
+  {}{\fail}
+
+\patchcmd\FV@ListProcessLine
+  {\kern\leftmargin}
+  {\FV@StepLineNo\kern\leftmargin}
+  {}{\fail}
+
+%%
+%% define new option "numberstyle" which influences the line number inside
+%%   verbatim-like env only
+%%
+\define@key{FV}{numberstyle}{%
+ \def\FV@NumberStyle{#1}%
+}
+\fvset{numberstyle=\tiny}  % initial value
+
+% redefine \theFancyVerbLine, move \tiny into "numberstyle"
+\def\theFancyVerbLine{\rmfamily\arabic{FancyVerbLine}}
+\def\FV@TheLineNumber{\FV@NumberStyle\theFancyVerbLine}
+
+% redefine \FV@Numbers@left and \FV@Numbers@right, 
+% use \FV@TheLineNumber instead of \theFancyVerbLine
+\patchcmd\FV@Numbers@left
+ {\theFancyVerbLine}{\FV@TheLineNumber}{}{\fail}
+\patchcmd\FV@Numbers@left
+ {\theFancyVerbLine}{\FV@TheLineNumber}{}{\fail}
+\patchcmd\FV@Numbers@right
+ {\theFancyVerbLine}{\FV@TheLineNumber}{}{\fail}
+\patchcmd\FV@Numbers@right
+ {\theFancyVerbLine}{\FV@TheLineNumber}{}{\fail}
+\makeatother
+
+\begin{document}
+%\fontsize{10}{50}\selectfont
+\begin{Verbatim}[numbers=left, commandchars=\\\{\}]
+first\label{vrb:1}
+second\label{vrb:2}
+third\label{vrb:3}
+forth\label{vrb:4}
+fifth\label{vrb:5}
+sixth\label{vrb:6}
+a\end{Verbatim}
+
+\ref{vrb:1}, \ref{vrb:2}, \ref{vrb:3}, \ref{vrb:4}, \ref{vrb:5}, and \ref{vrb:6}
+\newpage\null
+\end{document}
