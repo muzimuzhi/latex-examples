@@ -29,15 +29,15 @@
   {
     \seq_set_from_clist:Nn \l_tcb_heads_seq {#1}
     \seq_pop_left:NN \l_tcb_heads_seq \l_tmpa_tl
-    \exp_after:wN \tcb_doc_head:nnnn \l_tmpa_tl 
+    \exp_after:wN \tcb_doc_head:nnnn \l_tmpa_tl
       {after~ skip=0pt, enlarge~ bottom~ by=0pt}
     \seq_pop_right:NN \l_tcb_heads_seq \l_tmpa_tl
     \seq_map_inline:Nn \l_tcb_heads_seq
       {
-        \tcb_doc_head:nnnn ##1 
+        \tcb_doc_head:nnnn ##1
           {before~ skip=0pt, after~ skip=0pt, enlarge~ bottom~ by=0pt}
       }
-    \exp_after:wN \tcb_doc_head:nnnn \l_tmpa_tl 
+    \exp_after:wN \tcb_doc_head:nnnn \l_tmpa_tl
       {before~ skip=0pt}
   }
 
