@@ -1,0 +1,114 @@
+% ref: https://github.com/muzimuzhi/paper_reading/blob/bf766720c67a828204be620adba09633c1ae5bb8/plot/fibinet.tex
+\documentclass[tikz, margin=5pt]{standalone}
+\usetikzlibrary{
+  arrows.meta,
+  calc,
+  fit,
+  positioning,
+  quotes
+}
+\begin{document}
+\makeatletter
+\tikzset{
+  meta box/.style={
+    draw,
+    black,
+    very thick,
+    text centered
+  },
+  punkt/.style={
+    meta box,
+    rectangle,
+    rounded corners,
+    inner sep=5pt,
+    minimum height=2em,
+    minimum width=6em,
+    align=center,
+    text width=6em
+  },
+  round box/.style={
+    meta box,
+    circle
+  },
+  every fit/.style={
+    draw,
+    thick,
+    dashed,
+    gray,
+    inner sep=10pt
+  }
+}
+
+% helper macro
+\newcommand\tikz@expand@dimen[2]{\tikzset{minimum #2=#1}}
+% tikz styles: adjust min width/height of nodes
+\tikzset{
+  add dimen/.code 2 args={%
+    \pgfkeysgetvalue{/pgf/minimum #1}\tikz@dimen@min
+    \expandafter\tikz@expand@dimen\expandafter{\tikz@dimen@min + #2 * 2em}{#1}%
+  },
+  wider/.style={add dimen={width}{#1}},
+  higher/.style={add dimen={height}{#1}},
+}
+\makeatother
+
+\begin{tikzpicture}[font=\LARGE, node font=\LARGE]
+  %% rectangles
+  \node[punkt, wider=1, higher=1]
+    (E) {input: $E\colon (f \times k)$};
+  \node[meta box, below=2 of E]
+    (pool) {max pool};
+  \node[punkt, wider=1, below=1.5 of pool]
+    (Z) {$Z\colon (f \times 1)$};
+  \node[punkt, below=2 of Z]
+    (Z1) {$(f/r \times 1)$};
+  \node[punkt, wider=1, below=2 of Z1]
+    (A) {$A \colon (f \times 1)$};
+  \node[round box, label=right:Re-Scale, below=of A]
+    (multiply) {$\times$};
+  \node[punkt, wider=1, higher=1, below=of multiply]
+    (V) {$V \colon (f \times k)$};
+
+  \begin{scope}[xshift=10cm, yshift=-4cm]
+    \node[punkt, wider=1, higher=2.5]
+      (bilinear1) {$\forall i<j$ \\ $e_i \cdot W \odot e_j \to p_{i,j} \in R^k$};
+    \node[punkt, wider=1, higher=2.5, below=5 of bilinear1]
+      (bilinear2) {$\forall i<j$ \\ $v_i \cdot W \odot v_j \to q_{i,j} \in R^k$};
+  \end{scope}
+
+  \node[punkt, wider=2, right=4 of bilinear1]
+    (P) {$p$: $(n \times k)$};
+  \node[punkt, wider=2, right=4 of bilinear2]
+    (Q) {$q$: $(n \times k)$};
+  \node[round box, label=left:concat]
+    (add) at ($(P)!0.5!(Q)$){$+$};
+  \node[punkt, rounded corners=0pt, wider=2, higher=2.5, right=5 of add]
+    (dnn) {DNN};
+
+  %% arrowed lines
+  \path[arrows={->[scale=1.2]}, thick]
+    (E)         edge (pool)
+    (pool)      edge (Z)
+    (Z)         edge["${} \cdot W_1 \in R^{f\times f/r}$"'{right=3pt, inner sep=0pt, name=tip1}] (Z1)
+    (Z1)        edge["${} \cdot W_2 \in R^{f/r \times f}$"'{right=3pt, inner sep=0pt, name=tip2}] (A)
+    (A)         edge (multiply)
+    (multiply)  edge (V)
+    (E)         edge[bend right=90] (multiply)
+    (E)         edge (bilinear1)
+    (bilinear1) edge (P)
+    (P)         edge (add)
+    (V)         edge (bilinear2)
+    (bilinear2) edge (Q)
+    (Q)         edge (add)
+    (add)       edge["$c\colon (2n \times k)$"] (dnn)
+    (dnn.east)  edge["output"] +(3, 0);
+
+  %% frames
+  \node[
+    fit=(pool) (Z) (multiply) (tip1) ($(Z1)!-1!(tip2.east)$),
+    label={[gray, anchor=south]north west:SENET}] {};
+  \node[
+    fit=(bilinear1) (bilinear2),
+    label={[gray, anchor=south]north west:Bilinear Interaction Layer}] {};
+\end{tikzpicture}
+\end{document}
