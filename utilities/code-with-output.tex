@@ -1,7 +1,7 @@
 \usepackage{tcolorbox}
 \usepackage{accsupp}  % PDF accessibility support
 
-\tcbuselibrary{skins, minted, xparse}
+\tcbuselibrary{hooks, minted, skins, xparse}
 
 % make line numbers unable to be selected
 % ref: https://liam.page/2013/11/04/LaTeX-listings-copy/
@@ -19,13 +19,17 @@
 }
 \ExplSyntaxOff
 
-\makeatletter
-\tcbset{
-  % see tcbminted.code.tex, def of "minted options"
-  % minted options/.store in=\kvtcb@minted@options,
-  minted options app/.code=\appto\kvtcb@minted@options{,#1}
-}
-\makeatother
+
+% option "minted options app" has been added to tcolorbox,
+%   "hooks" library since v4.21, see
+%   https://github.com/T-F-S/tcolorbox/issues/73
+% \makeatletter
+% \tcbset{
+%   % see tcbminted.code.tex, def of "minted options"
+%   %   minted options/.store in=\kvtcb@minted@options,
+%   minted options app/.code=\appto\kvtcb@minted@options{,#1}
+% }
+% \makeatother
 
 % define new option
 \tcbset{
@@ -52,13 +56,11 @@
 % new env: example
 % #1 - <kv list>, tcb-listing options
 % #2 - <token list>, title
-\makeatletter
 \NewTCBListing[auto counter]{example}{ O{} m }{
   example options,
   example title={\thetcbcounter}{#2},
   #1
 }
-\makeatother
 
 % new env: example*
 % like example, except that it is un-numbered
