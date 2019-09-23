@@ -1,0 +1,30 @@
+\documentclass{article}
+\loggingoutput\scrollmode
+%\usepackage[T1]{fontenc}
+%\usepackage{unravel}
+%\unravelsetup{max-input=1000, max-output=1000, max-action=1000}
+\input code-with-output
+
+\begin{document}
+\begin{example}{Compare output of \texttt{\textbackslash\_} in different font encodings}
+  \def\test#1{\makebox[1.5em][r]{#1}: MM\_MM}
+  
+  \usefont{OT1}{cmr}{m}{n} \test{OT1} \par
+  \usefont{T1} {cmr}{m}{n} \test{T1}  \par
+  \usefont{TU} {lmr}{m}{n} \test{TU}  \par
+\end{example}
+
+\begin{example}{Redefine \texttt{\textbackslash\_} in \texttt{TU} font encoding}
+  \makeatletter
+  \long\def\@tempa{TU}
+  \ifx\UnicodeEncodingName\@tempa
+    \let\textunderscore\relax
+    \DeclareRobustCommand{\textunderscore}{%
+      \leavevmode \kern.06em\vbox{\hrule\@width.3em}\kern.06em}
+  \fi
+  \makeatother
+    
+  MM\_MM
+\end{example}
+
+\end{document}
