@@ -1,0 +1,93 @@
+\documentclass{article}
+\usepackage{ctexheading}
+\usepackage{tcolorbox}
+
+\input code-with-output
+
+\begin{document}
+\tableofcontents
+
+\newpage
+\begin{example}{One-argument macro at the end of format config}
+  \ctexset{
+    section={
+      nameformat+=\sectionFormat
+    }
+  }
+  \newcommand\sectionFormat[1]{%
+    \tcbox[on line]{#1}%
+  }
+  
+  \section{title}
+\end{example}
+
+\begin{example}{Use section \texttt{name} and \texttt{title} as \texttt{tcolorbox} upper and lower part}
+  \ctexset{
+    section={
+      indent=0pt,
+      format+=\sectionFormat,
+      titleformat=\tcblower,
+      aftertitle=\end{tcolorbox}
+    }
+  }
+  \newcommand\sectionFormat[1]{%
+    \begin{tcolorbox}[sidebyside, lefthand ratio=0.2]
+      #1
+  }
+  \section{title}
+\end{example}
+
+
+\begin{example}{Store section \texttt{name} and \texttt{title} as macros}
+  \ctexset{
+    section={
+      indent=0pt,
+      nameformat=\noexpand\storeContents\noexpand\sectionName,
+      titleformat=\storeContents\sectionTitle,
+      aftertitle={%
+        \begin{tcolorbox}[sidebyside, lefthand ratio=0.2]
+          \sectionName \tcblower \sectionTitle
+        \end{tcolorbox}%
+      }
+    }
+  }
+  \newcommand\storeContents[2]{\long\gdef#1{#2}}
+  
+  \section{title}
+\end{example}
+
+
+\end{document}
+% before
+\section{title} -> 第一节 title
+
+% after
+\ctexset{section/titleformat=\bfseries\fbox}
+\section{title} -> 第一节 \bfseries\fbox{title}
+
+
+\@format{
+  \@indent
+  \@nameformat{\@name\@aftername}
+  \@titleformat{\@title}
+  \@aftertitle
+}
+
+\@format{
+  \begin{tcolorbox}
+    \@indent
+    \@nameformat{\@name\@aftername}
+    \tcblower{\@title}
+  \end{tcolorbox}
+}
+
+\@format{
+  \@indent
+  \long\gdef\sectionName{\@name\@aftername}
+  \long\gdef\sectionTitle{\@title}
+  \begin{tcolorbox}
+    \sectionName
+    \tcblower
+    \sectionTitle
+  \end{tcolorbox}
+}
