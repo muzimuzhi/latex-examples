@@ -1,0 +1,141 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicematrix}
+\usetikzlibrary{calc, matrix, shapes.misc}
+
+
+\input code-with-output
+\begin{document}
+
+\begin{example}[sidebyside]{Plain \TeX{} \texttt{\textbackslash bordermatrix}}
+  \[
+    \bordermatrix{
+        & i & j & k \cr
+      1 & a & b & c \cr
+      2 & d & e & f
+    }
+  \]
+\end{example}
+
+
+\begin{example}[sidebyside, righthand width=3cm]{\LaTeXe{} \texttt{array} environment}
+  \[
+    \left[\begin{array}{lcr}
+    	a_1     &   b_1   &     c_1 \\
+    	a_{11}  & b_{11}  &  c_{11} \\
+    	a_{111} & b_{111} & c_{111}
+    \end{array}\right]
+  \]
+\end{example}
+
+
+\makeatletter
+\newlength\@delta   \setlength\@delta{5pt}
+\newlength\@yOffset \setlength\@yOffset{5pt}
+\newlength\@xOffset \setlength\@xOffset{5pt}
+
+% re-define to adjust position of matrix delimiter
+\def\tikz@delimiter#1#2#3#4#5#6#7#8{%
+  \bgroup
+    \pgfextra{\let\tikz@save@last@fig@name=\tikz@last@fig@name}%
+    node[outer sep=0pt, inner sep=0pt, 
+      draw=none, fill=none, anchor=#1, 
+      at=(\tikz@last@fig@name.#2), #3, yshift=\@yOffset]
+    {%
+      {\nullfont\pgf@process{%
+        \pgfpointdiff
+          {\pgfpointanchor{\tikz@last@fig@name}{#4}}
+          {\pgfpointanchor{\tikz@last@fig@name}{#5}}%
+      }}%
+      $\left#6
+        \vcenter{\hrule height \dimexpr .5#8 - \@delta\relax 
+                        depth  \dimexpr .5#8 - \@delta\relax 
+                        width 0pt}
+        \hskip-\@xOffset\relax\right#7$%
+    }
+    \pgfextra{\global\let\tikz@last@fig@name=\tikz@save@last@fig@name}%
+  \egroup
+}
+\makeatother
+
+\begin{example}{\texttt{Ti\textit{k}Z matrix}, annotations on matrix}
+  % \usepackage{amssymb}
+  % \usepackage{tikz}
+  % \usetikzlibrary{matrix, shapes.misc}
+  \tikzset{
+    m common/.style={draw, inner sep=1pt},
+    mo/.style={m common, circle},
+    mx/.style={m common, cross out}
+  }
+  
+  \begin{tikzpicture}[baseline=(magic-2-1.base)]
+    \matrix (magic) [matrix of nodes, 
+      left delimiter={[}, right delimiter={]}, 
+      above delimiter=\{, below delimiter=\}] {
+      8 & |[mo]|1 & |[mx]|6 \\
+      3 &       5 &       7 \\
+      4 &       9 &       2 \\
+    };
+    
+    \draw[thick, blue] (magic-3-1.west) -- (magic-3-3.east);
+    \node[xshift=10pt] at (magic-2-3.east) {$\checkmark$};
+  \end{tikzpicture}
+\end{example}
+
+
+\ExplSyntaxOn
+\makeatletter
+
+\newcommand\phantomHeight[1]{\rule[#1]{0pt}{0pt}}
+\newcommand\phantomDepth[1]{\rule[-#1]{0pt}{0pt}}
+
+\newcommand\drawAboveDelimiter{\drawDelimiter{north}}
+\newcommand\drawBelowDelimiter{\drawDelimiter{south}}
+
+% Draw extented delimiter #2 which spreads from node (#3.west) to (#4.east).
+%   This macro imitates the definition of \tikz@delimiter, the macro behind 
+%   options of matrix library like "above delimiter" and "below delimiter".
+% #1 = name of node anchor
+% #2 = delimiter symbol, e.g., \rbrace
+% #3 = name of beginning node
+% #4 = name of ending node
+% #5 = extra tikz options act on the delimiter
+\def\drawDelimiter#1#2#3#4#5{
+  \begin{tikzpicture}
+    \node[outer~ sep=0pt, inner~ sep=0pt, 
+      draw=none, fill=none, #5, rotate=-90] 
+      at ($ (#3.#1)!.5!(#4.#1) $)
+    {
+      {\nullfont\pgf@process{
+        \pgfpointdiff
+          {\pgfpointanchor{nm - \int_use:N\g__nm_env_int - #3 -large}{west}}
+          {\pgfpointanchor{nm - \int_use:N\g__nm_env_int - #4 -large}{east}}
+      }}
+      $\left.\vcenter{\nullfont\hrule height .5\pgf@x depth .5\pgf@x width0pt}\right#2$
+    };
+  \end{tikzpicture}
+}
+
+\makeatother
+\ExplSyntaxOff
+
+\begin{example}{\texttt{nicematrix}, add above and below delimiters}
+  % \usepackage{nicematrix}
+  % \usetikzlibrary{calc}
+  \[
+    \begin{pNiceArray}{CCC}[last-col, first-row, create-extra-nodes, 
+        code-for-first-row=\phantomDepth{10pt},
+        code-after={
+          \drawAboveDelimiter{\lbrace}{1-1}{1-3}{yshift=.7em, blue}
+          \drawBelowDelimiter{\rbrace}{3-1}{3-3}{yshift=-.7em, teal}
+        }]
+      0 & 0 & 0 &     \\  % \\[10pt] does not work, 
+      1 & 2 & 3 & L_1 \\  % see `texdoc nicematrix`, sec. 6
+      4 & 5 & 6 & L_2 \\
+      7 & 8 & 9 & L_3
+    \end{pNiceArray}
+  \]
+\end{example}
+
+\end{document}
