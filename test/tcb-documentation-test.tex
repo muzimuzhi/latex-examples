@@ -21,10 +21,11 @@
 
 \input{../utilities/tcb-documentation}
 \input{../utilities/code-with-output}
+\ProvideDocumentEnvironment{example}{ s m }{#2}{}
 
 \begin{document}
 
-\begin{example}{Basic \texttt{docCommand} env, big vskip between adjacent items}
+\begin{example}{Basic |docCommand| env, big vskip between adjacent items}
   % \tcbuselibrary{documentation}
   
   \begin{docCommand}
@@ -42,7 +43,7 @@
 \end{example}
 
 
-\begin{example}{New \texttt{docCommands} env, zero vskip between adjacent items}
+\begin{example}{New |docCommands| env, zero vskip between adjacent items}
   \begin{docCommands}{
     {menu}
       {\oarg{input sep}\marg{menu sequence}}
@@ -57,5 +58,26 @@
   \end{docCommands}
 \end{example}
 
+\begin{example}{New |docCommands| env, test for length = 2}
+  \begin{docCommands}{
+    {menu}
+      {\oarg{input sep}\marg{menu sequence}}
+      {\oarg{input sep} defaults to |>|},
+    {directory}
+      {\oarg{input sep}\marg{menu sequence}}
+      {\oarg{input sep} defaults to |/|}}
+    \lipsum[23]
+  \end{docCommands}
+\end{example}
+
+\begin{example}{New |docCommands| env, test for length = 1}
+  \begin{docCommands}{
+    {menu}
+      {\oarg{input sep}\marg{menu sequence}}
+      {\oarg{input sep} defaults to |>|}}
+    \lipsum[23]
+  \end{docCommands}
+\end{example}
 
 \end{document}
+
