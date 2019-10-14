@@ -117,4 +117,35 @@
   \end{lstlisting}
 \end{example}
 
+\begin{example}[text only]{listings - change output style of ``*" symbol}
+  \newfontfamily\mono{Source Code Pro}
+  
+  \makeatletter
+  \def\useMono{\lst@AddToHook{OnNewLine}{\mono}}
+  \def\useRoman{\gdef\lsthk@OnNewLine{\rmfamily}} % clear hook
+  \makeatother
+  \useRoman
+  
+  Before patch:
+  \begin{lstlisting}[escapechar=\%]
+    \rmfamily: abc* *m%\useMono%
+        \mono: abc* *m
+  \end{lstlisting}
+
+  \makeatletter
+  % https://tex.stackexchange.com/a/424193
+  % see also `texdoc listings-devel`, sec. 13.3.1
+  \lst@CCPutMacro
+      \lst@ProcessOther {"2A}{*}
+      \@empty\z@\@empty
+  \makeatother
+  
+  \useRoman
+  After patch:
+  \begin{lstlisting}[escapechar=\%]
+    \rmfamily: abc* *m%\useMono%
+        \mono: abc* *m
+  \end{lstlisting}
+\end{example}
+
 \end{document}
