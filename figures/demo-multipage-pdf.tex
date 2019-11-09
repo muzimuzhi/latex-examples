@@ -1,0 +1,12 @@
+\documentclass{standalone}
+\standaloneenv{nothing}
+\usepackage{pgffor}
+\begin{document}
+\Huge
+\makeatletter
+\foreach \i in {1, ..., 7} {
+  \begin{nothing}%
+    \fbox{\@Alph{\i}}%
+  \end{nothing}
+}
+\end{document}

@@ -1,0 +1,187 @@
+\documentclass{article}
+\usepackage{etoolbox}
+\usepackage{graphicx}
+\usepackage{iftex}
+\usepackage{pgffor}
+
+\graphicspath{{figures/}}
+
+\makeatletter
+
+% Typeset an image like \includegraphics[<options>]{<image>}. If it is
+% a PDF file containing % multiple pages, typeset all of them.
+% #1 = <options> passed to \includegraphics
+% #2 = image file name
+\newcommand{\includeAllPages}[2][]{%
+  %% init
+  \def\Gin@count{1}%
+  \let\Gin@full\@empty
+  %% get page number
+  \savebox\@tempboxa{% pre-expand the typesetting of first page
+    \begingroup
+    \patch@Ginclude@graphics
+    \includegraphics[#1]{#2}%
+    \endgroup
+  }%
+  \ifx\Gin@full\@empty
+  \else
+    \@getPageNumOfPdf{\Gin@count}{\Gin@full}%
+  \fi
+  \usebox{\@tempboxa}% typeset the first page
+  \ifnum\Gin@count>1% typeset the rest pages if there exist.
+    \foreach \i in {2, ..., \Gin@count} {%
+      \allowbreak\includegraphics[#1, page=\i]{\Gin@full}
+    }%
+  \fi
+}
+
+\def\patch@Ginclude@graphics{%
+  \def\Ginclude@graphics##1{%
+    \ifx\detokenize\@undefined\else
+      \edef\Gin@extensions{\detokenize\expandafter{\Gin@extensions}}%
+    \fi
+    \begingroup
+    \let\input@path\Ginput@path
+    \set@curr@file{##1}%
+    \edef\uq@curr@file{\expandafter\unquote@name\expandafter{\@curr@file}}%
+    \expandafter\filename@parse\expandafter{\uq@curr@file}%
+    \edef\filename@area{\expandafter\quote@name\expandafter{\filename@area}}%
+    \edef\filename@base{\expandafter\quote@name\expandafter{\filename@base}}%
+    \ifx\filename@ext\relax
+      \@for\Gin@temp:=\Gin@extensions\do{%
+        \ifx\Gin@ext\relax
+          \Gin@getbase\Gin@temp
+        \fi}%
+    \else
+      \Gin@getbase{\Gin@sepdefault\filename@ext}%
+      \ifx\Gin@ext\relax
+         \@warning{File `##1' not found}%
+         \def\Gin@base{\filename@area\filename@base}%
+         \edef\Gin@ext{\Gin@sepdefault\filename@ext}%
+      \fi
+    \fi
+    %% PATCH BEGIN
+    %  - Base and ext part of image is not known until now.
+    %    Use \PackageWarning{TEST}{<\Gin@base> <\Gin@ext>} for test.
+    %  - Set \ifext@pdf according to whether extension is ".pdf".
+    %  - Store full file name (dir + basename + ext) in \Gin@full.
+    % 
+    % Use category-code-agnostic (insensitive) string comparison "\ifstrequal".
+    \expandafter\ifstrequal\expandafter{\Gin@ext}{.pdf}
+      {\xdef\Gin@full{\Gin@base\Gin@ext}}
+      {}%
+    %% PATCH END
+    \ifx\Gin@ext\relax
+         \@latex@error{File `##1' not found}%
+         {I could not locate the file with any of these extensions:^^J%
+          \Gin@extensions^^J\@ehc}%
+    \else
+       \@ifundefined{Gin@rule@\Gin@ext}%
+         {\ifx\Gin@rule@*\@undefined
+            \@latex@error{Unknown graphics extension: \Gin@ext}\@ehc
+          \else
+            \expandafter\Gin@setfile\Gin@rule@*{\Gin@base\Gin@ext}%
+           \fi}%
+         {\expandafter\expandafter\expandafter\Gin@setfile
+             \csname Gin@rule@\Gin@ext\endcsname{\Gin@base\Gin@ext}}%
+    \fi
+  \endgroup}%
+}
+
+% Store number of pages of pdf file #2 in command #1.
+%   Usage: \@getPageNumOfPdf{\Gin@count}{image.pdf}
+%   Ref: https://tex.stackexchange.com/q/198091
+\def\@getPageNumOfPdf#1#2{%
+  \ifPDFTeX
+    \pdfximage{#2}%
+    \xdef#1{\the\pdflastximagepages}%
+  \else\ifXeTeX
+    % trailing space in `"#2" ` is necessary
+    \xdef#1{\the\XeTeXpdfpagecount"#2" }%
+  \else
+    \PackageError{TEST}{Support engines pdftex and xetex only.}{}%
+  \fi
+}
+\makeatother
+
+
+\begin{document}
+\includeAllPages{demo-multipage-pdf}
+
+\end{document}
+
+% This patch is abandoned partly because it is engine specific,
+% hence not general enough.
+\def\patch@Ginclude@pdf{%
+  \global\ext@pdftrue
+  \ifPDFTeX
+    % originally defined in "xetex.def", "graphics-def" package
+    \def\Ginclude@pdf##1{%
+      \@getPageNumOfPdf{\Gin@count}{##1}%  add this line
+      \GPT@setup@scale
+      \Gin@log{%
+        <use ##1%
+        \ifx\Gin@page\@empty\else, page \Gin@page\fi
+        >%
+      }%
+      \PackageInfo{pdftex.def}{%
+        ##1 \ifx\Gin@page\@empty\else, page\Gin@page\fi
+        \GPT@space used\on@line.\MessageBreak
+        Requested size: %
+        \the\Gin@req@width\GPT@space x \the\Gin@req@height
+        \ifx\documentclass\@undefined\else\expandafter\@gobble\fi
+      }%
+      \Ginclude@@pdftex{\@nameuse{##1 image\Gin@attr@hash}}%
+    }
+  \else\ifXeTeX
+    % originally defined in "xetex.def", "graphics-def" package
+    \def\Ginclude@pdf##1{%
+      \@getPageNumOfPdf{\Gin@count}{##1}%  add this line
+      \GPT@setup@scale
+      \Gin@log{%
+        <use ##1%
+        \ifx\Gin@page\@empty\else, page \Gin@page\fi
+        >%
+      }%
+      \hbox{%
+        \Gscale@box{\Gin@scalex}[\Gin@scaley]{%
+          \@ifundefined{Gin@vllx}{%
+            \GPT@viewportfalse
+            % without viewport/trim clipping does not make sense
+            % for pdfTeX
+            \Gin@clipfalse
+          }{}%
+          \ifGin@clip
+            \if!\Gin@vllx\Gin@vlly\Gin@vurx\Gin@vury!%
+            \else
+              \let\GPT@clipend\GPT@DoClipEnd
+              \setbox\@tempboxa\hbox\bgroup
+            \fi
+          \fi
+          \ifGPT@viewport
+            \ifdim\Gin@vlly\p@=\z@
+            \else
+              \lower\Gin@vlly bp\hbox\bgroup
+            \fi
+            \ifdim\Gin@vllx\p@=\z@
+            \else
+              \hskip-\Gin@vllx bp\relax
+            \fi
+          \fi
+          \XeTeXpdffile"##1" %
+            \ifx\Gin@page\@empty\else page \Gin@page\fi
+            \ifx\Gin@pagebox\@empty\else\expandafter\Gread@@xetex@box\Gin@pagebox\fi
+          \ifGPT@viewport
+            \ifdim\Gin@vlly\p@=\z@
+            \else
+              \egroup
+            \fi
+            \GPT@clipend
+          \fi
+        }%
+      }%
+    }%
+  \else
+    \PackageError{TEST}{Support pdftex and xetex only.}{}%
+  \fi\fi
+}
