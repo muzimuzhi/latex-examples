@@ -1,5 +1,4 @@
 \documentclass{article}
-\usepackage{etoolbox}
 \usepackage{graphicx}
 \usepackage{iftex}
 \usepackage{pgffor}
@@ -9,7 +8,7 @@
 \makeatletter
 
 % Typeset an image like \includegraphics[<options>]{<image>}. If it is
-% a PDF file containing % multiple pages, typeset all of them.
+% a PDF file containing multiple pages, typeset all of them.
 % #1 = <options> passed to \includegraphics
 % #2 = image file name
 \newcommand{\includeAllPages}[2][]{%
@@ -30,10 +29,13 @@
   \usebox{\@tempboxa}% typeset the first page
   \ifnum\Gin@count>1% typeset the rest pages if there exist.
     \foreach \i in {2, ..., \Gin@count} {%
-      \allowbreak\includegraphics[#1, page=\i]{\Gin@full}
+      \allowbreak\includegraphics[#1, page=\i]{\Gin@full}%
     }%
   \fi
 }
+
+% detokenized ".pdf", all four characters have category code 12 (other).
+\edef\Gin@ext@pdf{\detokenize{.pdf}}
 
 \def\patch@Ginclude@graphics{%
   \def\Ginclude@graphics##1{%
@@ -61,15 +63,12 @@
       \fi
     \fi
     %% PATCH BEGIN
-    %  - Base and ext part of image is not known until now.
-    %    Use \PackageWarning{TEST}{<\Gin@base> <\Gin@ext>} for test.
-    %  - Set \ifext@pdf according to whether extension is ".pdf".
-    %  - Store full file name (dir + basename + ext) in \Gin@full.
-    % 
-    % Use category-code-agnostic (insensitive) string comparison "\ifstrequal".
-    \expandafter\ifstrequal\expandafter{\Gin@ext}{.pdf}
-      {\xdef\Gin@full{\Gin@base\Gin@ext}}
-      {}%
+    %  - Base and ext part (e.g., ".eps") of an image are not known until now.
+    %  - Store full file name (dir + basename + ext) in \Gin@full if extension
+    %    equals to the detokenized ".pdf".
+    \ifx\Gin@ext\Gin@ext@pdf
+      \xdef\Gin@full{\Gin@base\Gin@ext}
+    \fi
     %% PATCH END
     \ifx\Gin@ext\relax
          \@latex@error{File `##1' not found}%
