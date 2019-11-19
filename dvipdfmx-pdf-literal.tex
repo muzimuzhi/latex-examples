@@ -1,23 +1,26 @@
 \documentclass{ctexart}
-\usepackage{xcolor}
-% https://gist.github.com/muzimuzhi/d0df495a5e7356c00c893d5ab5ee9fbb
+\usepackage{pgffor}
 \input code-with-output
 
 \begin{document}
 
 \begin{example}{Fake bold demo}
+  % \usepackage{pgffor}
   \def\fakeBold#1#2{%
     \special{pdf:code q 2 Tr 0 G #1 w}%
     #2%
     \special{pdf:code Q}%
   }
-  \def\test#1{\fakeBold{#1}{你能吃玻璃吗}\par}
+  \def\test#1{\fakeBold{#1}{你能吃玻璃吗}}
   
   \huge
-  \test{0} \test{.2} \test{.5} \test{1}
+  \foreach \i in {0.0, 0.2, 0.5, 1.0} {
+    \test{\i}\par
+  }
 \end{example}
 
 \begin{example}{Fake bold application: \texttt{\textbackslash CJKunderwave}}
+  % \usepackage{pgffor}
   \def\fakeBold#1#2{%
     \special{pdf:code q 2 Tr #1 w 1 J 0 0 1 RG 0 0 1 rg}%
     #2%
@@ -29,11 +32,28 @@
   }
   \def\test#1{%
     \def\strokeWidth{#1}%
-    Line width \texttt{#1}: \CJKunderwave{几个字}\par
+    Line width \texttt{#1}: \CJKunderwave{几个字}
   }
   
   \large
-  \test{0.0} \test{0.2} \test{0.5} \test{1.0}
+  \foreach \i in {0.0, 0.2, 0.5, 1.0} {
+    \test{\i}\par
+  }
+\end{example}
+
+\begin{example}{Dashed text stroking}
+  % \usepackage{pgffor}
+  \newcommand{\strokeText}[1]{%
+    \special{pdf:code q 1 Tr #1 w [2 1] 0 d 1 J 1 0 0 RG}%
+    中文%
+    \special{pdf:code Q}%
+  }
+  
+  \Huge\bfseries\itshape
+  中文\par
+  \foreach \i in {0.1, 0.2, ..., 0.5} {
+    \strokeText{\i}%
+  }
 \end{example}
 
 \end{document}
