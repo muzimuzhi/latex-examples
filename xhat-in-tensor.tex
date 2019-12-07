@@ -1,0 +1,110 @@
+% questions on
+% - https://wenda.latexstudio.net/q-1115.html and
+% - https://www.zhihu.com/question/359661536
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{bm}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+\usepackage{xparse}
+
+\makeatletter
+\newsavebox\xhat@box
+\newsavebox\xhat@box@pre
+\newsavebox\xhat@box@suf
+\newsavebox\xhat@box@voffset
+
+\tikzset{
+  xhat line/.style={
+    line cap=round
+  },
+  xhat dot/.style={
+    midway, fill=black, draw=white, 
+    circle, 
+    line width=1pt, inner sep=1pt
+  },
+  xhat arrow/.style={
+    arrows={-Latex[length=3pt]}
+  }
+}
+
+\ExplSyntaxOn
+\NewDocumentCommand \xhat { O{} m }{
+  \xhat:nn {#1} {#2}
+}
+
+\tl_new:N \xhat_whole_tl
+
+% #1 = phantom height text
+% #2 = whole text
+\cs_new:Nn \xhat:nn
+  {
+    \tl_set:Nn \xhat_whole_tl {#2}
+    \xhat@setbox{@pre}    {\tl_head:N  \xhat_whole_tl}
+    \xhat@setbox{@suf}    {\tl_item:Nn \xhat_whole_tl {-1}}
+    \xhat@setbox{@voffset}{#1}
+    \xhat@setbox{}        {\xhat_whole_tl}
+    \mathnormal{
+      \mathop{
+        \mathstrut
+        \xhat@voffset{\xhat@box@voffset}
+        \xhat@voffset{\xhat@box}
+        \smash[t]{\usebox\xhat@box}
+      }
+      \limits^{
+        \begin{tikzpicture}[baseline={(beg)}]
+          \path 
+            (.5\wd\xhat@box@pre, 0)                coordinate (beg)
+            (\wd\xhat@box - .5\wd\xhat@box@suf, 0) coordinate (end);
+          \draw[white] (0, 0) -- +(\wd\xhat@box, 0);
+          \draw[xhat~ line] (beg) -- node[xhat~ dot] {} (end);
+          \path[xhat~ line, xhat~ arrow]
+            (beg) edge +(0, -5pt)
+            (end) edge +(0, -5pt);
+        \end{tikzpicture}
+      }
+    }
+  }
+
+\def\xhat@setbox#1#2{
+  \expandafter\savebox\csname xhat@box#1\endcsname {\ensuremath{#2}}
+}
+\def\xhat@voffset#1{
+  \rule{0pt}{\dimexpr\ht#1 - 2pt\relax}
+}
+\ExplSyntaxOff
+\makeatother
+
+\input code-with-output
+%   code-with-output.tex is downloadable from 
+%   https://github.com/muzimuzhi/latex-examples/blob/master/utilities/code-with-output.tex
+
+\begin{document}
+\begin{example}{Usage of \texttt{\textbackslash xhat}}
+  \parindent=0pt\large
+  
+  Simple syntax: \verb|\xhat{<text>}|
+  \[
+      xxx \xhat{abcd} yyy = \xhat{ST} 
+  \]
+  
+  Be careful: surround the first and last ``complex symbol" in braces or not?
+  \begin{align*}
+    abc \xhat{a^2bc}ddd   &= \xhat{ST_2}    \tag{without braces}  \\
+    abc \xhat{{a^2}bc}ddd &= \xhat{S{T_2}}  \tag{with braces}     \\
+    abc \xhat{a^2bc}ddd   &= \xhat{S{T_2}}  \tag{more preferable}
+  \end{align*}
+\end{example}
+
+\begin{example}{Usage of \texttt{\textbackslash xhat}}
+  Full syntax: \verb|\xhat[<phantom height text>]{<text>}|
+  \begin{align*}
+    \xhat{{\bm{T}}{\bm{S}}} &=
+      \xhat{{\bm{g}}^{k^{2^2}}\bm{g}^l\bm{g}_r{\bm{g}_s}}
+                              \tag{different heights} \\
+    \xhat[\bm{g}^{k^{2^2}}]{{\bm{T}}{\bm{S}}} &=
+      \xhat{{\bm{g}}^{k^{2^2}}\bm{g}^l\bm{g}_r{\bm{g}_s}}
+                                    \tag{same height}
+  \end{align*}
+\end{example}
+\end{document}
