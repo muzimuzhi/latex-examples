@@ -21,6 +21,9 @@
 \input{../utilities/code-with-output}
 \ProvideDocumentEnvironment{example}{ s m }{#2}{}
 
+%\usepackage{makeidx}
+\makeindex
+
 \begin{document}
 
 \begin{example}{Original env \Verb|docCommand|, big vskip between adjacent items}
@@ -116,4 +119,6 @@
     content
   \end{docCommands-keyvals}
 \end{example}
+
+\printindex
 \end{document}
