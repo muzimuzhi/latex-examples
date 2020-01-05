@@ -76,19 +76,13 @@
 \makeatother
 
 \input code-with-output
-%   code-with-output.tex is downloadable from 
-%   https://github.com/muzimuzhi/latex-examples/blob/master/utilities/code-with-output.tex
 
 \begin{document}
-\begin{example}{Usage of \texttt{\textbackslash xhat}}
-  \parindent=0pt\large
+\begin{example}{Simple syntax of \Verb|\xhat|}
+  Simple syntax: \Verb|\xhat{<text>}|
+  \[ xxx \xhat{abcd} yyy = \xhat{ST} \]
   
-  Simple syntax: \verb|\xhat{<text>}|
-  \[
-      xxx \xhat{abcd} yyy = \xhat{ST} 
-  \]
-  
-  Be careful: surround the first and last ``complex symbol" in braces or not?
+  Be careful: surround the first and last ``compound symbol" in braces or not?
   \begin{align*}
     abc \xhat{a^2bc}ddd   &= \xhat{ST_2}    \tag{without braces}  \\
     abc \xhat{{a^2}bc}ddd &= \xhat{S{T_2}}  \tag{with braces}     \\
@@ -96,8 +90,8 @@
   \end{align*}
 \end{example}
 
-\begin{example}{Usage of \texttt{\textbackslash xhat}}
-  Full syntax: \verb|\xhat[<phantom height text>]{<text>}|
+\begin{example}{Full syntax of \Verb|\xhat|}
+  Full syntax: \Verb|\xhat[<phantom height text>]{<text>}|
   \begin{align*}
     \xhat{{\bm{T}}{\bm{S}}} &=
       \xhat{{\bm{g}}^{k^{2^2}}\bm{g}^l\bm{g}_r{\bm{g}_s}}
