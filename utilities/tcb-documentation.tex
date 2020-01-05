@@ -5,10 +5,11 @@
 \makeatletter
 
 % #1 = tcb options
-% #2 = clist of 3-tuple, "{name}{arg}{desc}, {}{}{}, ..."
+% #2 = clist of 3-tuple, "{name}{para}{desc}, {}{}{}, ..."
 \NewDocumentEnvironment{docCommands}{ O{} m }
   {
-    \tcbset{#1}
+    % init \kvtcb@doc@label to empty
+    \tcbset{doc~ label=,#1}
     \begin{tcb@manual@entry}
     \tcb_doc_heads:n {#2}
     \nobreak\tcbset{before~ upper=}
@@ -21,9 +22,16 @@
     \end{tcb@manual@entry}
   }
 
+% list of no-duplication label names
+\clist_new:N \l_tcb_doc_labelnames_clist
+% list of no-duplication cmd names 
+\clist_new:N \l_tcb_doc_cmdnames_clist
+% seq of "{{name}{para}{dect}}"
+\seq_new:N \l_tcb_doc_heads_seq
 
-\clist_new:N \l_tcb_doc_cmdnames_clist % list of cmd names without repetiion
-\seq_new:N \l_tcb_doc_heads_seq % seq of "{{name}{para}{dect}}"
+% temp
+\tl_new:N \l_tcb_temp_tl
+\seq_new:N \l_tcb_temp_seq
 
 % call \tcb_doc_head:nnnn differently depending on the length of #1
 % #1 = clist of 3-tuple, "{name}{par}{desc}, {}{}{}, ..."
@@ -31,18 +39,20 @@
   {
     % init
     \clist_clear:N \l_tcb_doc_cmdnames_clist
+    \clist_clear:N \l_tcb_doc_labelnames_clist
 
     \seq_set_from_clist:Nn \l_tcb_doc_heads_seq {#1}
-    \seq_pop_left:NN \l_tcb_doc_heads_seq \l_tmpa_tl
+    % store current head in \l_tcb_temp_tl
+    \seq_pop_left:NN \l_tcb_doc_heads_seq \l_tcb_temp_tl
     \seq_if_empty:NTF \l_tcb_doc_heads_seq
       {
         % length == 1
-        \exp_after:wN \tcb_doc_head:nnnn \l_tmpa_tl {}
+        \exp_after:wN \tcb_doc_head:nnnn \l_tcb_temp_tl {}
       }{
         % length >= 2
-        \exp_after:wN \tcb_doc_head:nnnn \l_tmpa_tl
+        \exp_after:wN \tcb_doc_head:nnnn \l_tcb_temp_tl
           {after~ skip=0pt, enlarge~ bottom~ by=0pt}
-        \seq_pop_right:NN \l_tcb_doc_heads_seq \l_tmpa_tl
+        \seq_pop_right:NN \l_tcb_doc_heads_seq \l_tcb_temp_tl
         \seq_if_empty:NF \l_tcb_doc_heads_seq
         {
           % length >= 3
@@ -52,7 +62,7 @@
                 {before~ skip=0pt, after~ skip=0pt, enlarge~ bottom~ by=0pt}
             }
         }
-        \exp_after:wN \tcb_doc_head:nnnn \l_tmpa_tl
+        \exp_after:wN \tcb_doc_head:nnnn \l_tcb_temp_tl
           {before~ skip=0pt}
       }
   }
@@ -60,22 +70,28 @@
 
 % execute single {tcb@doc@head} env
 % #1 = command csname
-% #2 = arg spec
+% #2 = command parameters
 % #3 = command description
 % #4 = tcb options
 \cs_new:Nn \tcb_doc_head:nnnn
   {
+    \tcbset{doc~ label=#1}
     \begin{tcb@doc@head}{doc@head@command, #4}
     % it is better to append \strut inside \tcb@Print@Com
     \strut
     \tcb@Print@Com{#1}
-    % for the same command name, write at most one index and one label 
-    \clist_if_in:NnF \l_tcb_doc_cmdnames_clist {#1}
+    % write no-duplicate indexes per environment
+    \clist_if_in:NnF \l_tcb_doc_cmdnames_clist { #1 }
       {
         \tcb@index@Com{#1}
+        \clist_gput_right:Nn \l_tcb_doc_cmdnames_clist { #1 }
+      }
+    % write no-duplicate labels per environment
+    \clist_if_in:NVF \l_tcb_doc_labelnames_clist { \kvtcb@doc@label }
+      {
         \protected@edef\@currentlabel{\noexpand\tcb@cs{#1}}
-        \label{com:#1}
-        \clist_gput_right:Nn \l_tcb_doc_cmdnames_clist {#1}
+        \label{com:\kvtcb@doc@label}
+        \clist_gput_right:NV \l_tcb_doc_labelnames_clist { \kvtcb@doc@label }
       }
     {\ttfamily #2}
     % more efficent than \tcbset{doc description=#3}
@@ -128,7 +144,6 @@
   }
 
 \clist_new:N \l_tcb_doc_heads_clist % store #1 of \tcb_doc_heads:n
-\seq_new:N \l_tcb_temp_seq % store one item of \l_tcb_doc_heads_clist
 
 \cs_new:Nn \tcb_doc_heads_kv:nn
   {
@@ -152,6 +167,7 @@
 \cs_new:Nn \tcb_doc_head_parse_kv:n
   {
     \tcbset{documentation/.cd, #1}
+    % store item of \l_tcb_doc_heads_clist in \l_tcb_temp_seq
     \seq_clear:N \l_tcb_temp_seq
     \clist_map_inline:nn { name, parameter, description }
       { \meta_seq_brace_put_right:Nv \l_tcb_temp_seq { kvtcb@doc@ ##1 } }
@@ -173,15 +189,16 @@
 
 
 %% ----------------------------
-%% begin: original definitions
+%% begin: original definitions, v4.22
 %%   from tcbdocumentation.code.tex
 %%   link https://github.com/T-F-S/tcolorbox/blob/master/tex/latex/tcolorbox/tcbdocumentation.code.tex
 %% ----------------------------
 
-\newenvironment{docCommand}[3][]{\tcbset{#1}%
+% v4.21, new option "doc label"
+\newenvironment{docCommand}[3][]{\tcbset{doc label={#2},#1}%
   \begin{tcb@manual@entry}%
   \begin{tcb@doc@head}{doc@head@command}%
-  \tcb@Print@Com{#2}\tcb@index@Com{#2}\protected@edef\@currentlabel{\noexpand\tcb@cs{#2}}\label{com:#2}{\ttfamily #3}%
+  \tcb@Print@Com{#2}\tcb@index@Com{#2}\protected@edef\@currentlabel{\noexpand\tcb@cs{#2}}\label{com:\kvtcb@doc@label}{\ttfamily #3}%
   \tcb@doc@do@description%
   \end{tcb@doc@head}\nobreak\tcbset{before upper=}\kvtcb@doc@body@command@before\ignorespaces}%
   {\ifvmode\else\unskip\fi\kvtcb@doc@body@command@after\end{tcb@manual@entry}}
