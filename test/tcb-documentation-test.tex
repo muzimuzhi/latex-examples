@@ -1,7 +1,7 @@
 \PassOptionsToPackage{hyperindex,colorlinks}{hyperref}
 \documentclass{article}
 \usepackage[documentation]{tcolorbox}
-\usepackage{shortvrb}
+\usepackage{fancyvrb}
 \usepackage{lipsum}
 
 \tcbset{
@@ -17,19 +17,17 @@
   index annotate,
 }
 
-\MakeShortVerb{\|}
-
 \input{../utilities/tcb-documentation}
 \input{../utilities/code-with-output}
 \ProvideDocumentEnvironment{example}{ s m }{#2}{}
 
 \begin{document}
 
-\begin{example}{Basic |docCommand| env, big vskip between adjacent items}
+\begin{example}{Original env \Verb|docCommand|, big vskip between adjacent items}
   % \tcbuselibrary{documentation}
   
   \begin{docCommand}
-    [doc description=\oarg{input sep} defaults to |>|]
+    [doc description=\oarg{input sep} defaults to \Verb|>|]
     {menu}
     {\oarg{input sep}\marg{menu sequence}}
   \end{docCommand}
@@ -43,41 +41,79 @@
 \end{example}
 
 
-\begin{example}{New |docCommands| env, zero vskip between adjacent items}
+\begin{example}{New env \Verb|docCommands|, zero vskip between adjacent items}
   \begin{docCommands}{
     {menu}
       {\oarg{input sep}\marg{menu sequence}}
-      {\oarg{input sep} defaults to |>|},
+      {\oarg{input sep} defaults to \Verb|>|},
     {directory}
       {\oarg{input sep}\marg{menu sequence}}
-      {\oarg{input sep} defaults to |/|},
+      {\oarg{input sep} defaults to \Verb|/|},
     {keys}
       {\oarg{input sep}\marg{menu sequence}}
-      {\oarg{input sep} defaults to |+|}}
+      {\oarg{input sep} defaults to \Verb|+|}}
     \lipsum[23]
   \end{docCommands}
 \end{example}
 
-\begin{example}{New |docCommands| env, test for length = 2}
+\begin{example}{New env \Verb|docCommands|, test for length = 2}
   \begin{docCommands}{
     {menu}
       {\oarg{input sep}\marg{menu sequence}}
-      {\oarg{input sep} defaults to |>|},
+      {\oarg{input sep} defaults to \Verb|>|},
     {directory}
       {\oarg{input sep}\marg{menu sequence}}
-      {\oarg{input sep} defaults to |/|}}
+      {\oarg{input sep} defaults to \Verb|/|}}
     \lipsum[23]
   \end{docCommands}
 \end{example}
 
-\begin{example}{New |docCommands| env, test for length = 1}
+\begin{example}{New env \Verb|docCommands|, test for length = 1}
   \begin{docCommands}{
     {menu}
       {\oarg{input sep}\marg{menu sequence}}
-      {\oarg{input sep} defaults to |>|}}
+      {\oarg{input sep} defaults to \Verb|>|}}
     \lipsum[23]
   \end{docCommands}
 \end{example}
 
-\end{document}
 
+\begin{example}{New env \Verb|docCommands-keyvals|}
+  \begin{docCommands-keyvals}
+    {
+      name = menu,
+      para = \oarg{input sep}\marg{menu sequence},
+      desc = \oarg{input sep} defaults to \Verb|>|
+    }
+    [
+      {
+        name = directory,
+        desc = \oarg{input sep} defaults to \Verb|/|
+      },
+      {
+        name = keys,
+        desc = \oarg{input sep} defaults to \Verb|+|
+      }
+    ]
+    content
+  \end{docCommands-keyvals}
+\end{example}
+
+\begin{example}{New env \Verb|docCommands-keyvals|, document \Verb|\newtheorem| from \Verb|amsthm| package}
+  \begin{docCommands-keyvals}
+    {
+      name = newtheorem,
+      para = \marg{envname},
+    }
+    [
+      para = \marg{envname}\oarg{numbered within},
+      para = \oarg{numbered like}\marg{envname},
+      {
+        name = newtheorem*,
+        desc = unnumberd theorem
+      }
+    ]
+    content
+  \end{docCommands-keyvals}
+\end{example}
+\end{document}
