@@ -1,0 +1,69 @@
+\documentclass[a4paper,fleqn]{cas-sc}
+\usepackage{natbib}
+\usepackage{lipsum}
+
+\ExplSyntaxOn
+\tl_const:Nn \c_RCSversion_tl {1.0}
+\tl_const:Nn \c_RCSdate_tl    {2019/02/11}
+\msg_new:nnnn {cas-patch} {cannot-patch} 
+  {
+    Cannot~ patch:~ wrong~ ``els-cas-templates"~ version. \\
+    Required~ version:~ #1,~ current~ version:~ #2. \\
+    Required~ date:~ #3,~ current~ date:~ #4.
+  }
+  {}
+
+\bool_if:nTF
+  {
+    \tl_if_eq_p:NN \c_RCSversion_tl \RCSversion &&
+    \tl_if_eq_p:NN \c_RCSdate_tl    \RCSdate
+  }
+  {
+    \cs_set:Npn \__make_fig_caption:nn #1#2
+    {
+      \l_fig_align_tl
+      \skip_vertical:N \l_fig_abovecap_skip
+      \dim_set:Nn \l_fig_width_dim { \hsize } % this line is added
+      \parbox{ \l_fig_width_dim }
+       {\rightskip=0pt\sffamily\small\textbf{\color{scolor}#1:}~#2\par }
+      \skip_vertical:N \l_fig_belowcap_skip
+    }
+    
+    \cs_set:Npn \__make_tbl_caption:nn #1#2
+    {
+      \l_tbl_align_tl
+      \skip_vertical:N \l_tbl_abovecap_skip 
+      \dim_set:Nn \l_tbl_width_dim { \hsize } % this line is added
+      {\parbox{ \dimexpr(\l_tbl_width_dim)}
+        {\rightskip=0pt\sffamily\small\textbf{\color{scolor}#1}\par#2\par\vskip4pt }}
+      \skip_vertical:N \l_tbl_belowcap_skip
+    }
+  }
+  {
+    \msg_error:nnxxxx {cas-patch} {cannot-patch}
+      {\RCSversion} {\c_RCSversion_tl} {\RCSdate} {\c_RCSdate_tl}
+  }
+
+\ExplSyntaxOff
+
+\begin{document}
+\begin{figure}[pos=h]
+  \centering
+  \begin{minipage}[t]{0.4\textwidth}
+    \caption{\lipsum*[75]}
+  \end{minipage}\quad
+  \begin{minipage}[t]{0.4\textwidth}
+    \caption{\lipsum*[74]}
+  \end{minipage}
+\end{figure}
+
+\begin{table}[pos=h]
+	\centering
+	\begin{minipage}[t]{0.4\textwidth}
+		\caption{\lipsum*[75]}
+	\end{minipage}\quad
+	\begin{minipage}[t]{0.4\textwidth}
+		\caption{\lipsum*[74]}
+	\end{minipage}
+\end{table}
+\end{document}
