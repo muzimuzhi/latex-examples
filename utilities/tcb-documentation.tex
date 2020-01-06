@@ -277,3 +277,26 @@
 %% ----------------------------
 %% end: original definitions
 %% ----------------------------
+
+
+%% ----------------------------
+%% begin: macro-expand trace
+%% ----------------------------
+
+{docCommands} env
+    \tcb_doc_parse_old_heads:n {#2}
+        \tcb_doc_heads:V \l_tcb_temp_clist
+
+{docCommands-keyvals} env
+    \tcb_doc_heads_kv:nn {#2} {#3}
+        \tcb_doc_head_parse_kv:n {#1}
+        \group_begin: \tcb_doc_head_parse_kv:n {##1} \group_end:
+        \tcb_doc_heads:V { \l_tcb_doc_heads_clist }
+
+\tcb_doc_heads:V
+    \tcb_doc_head:nn {doc-head options} {tcb@doc@head env options}
+        {tcb@doc@head} env
+
+%% ----------------------------
+%% end: macro-expand trace
+%% ----------------------------
