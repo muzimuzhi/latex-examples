@@ -4,14 +4,66 @@
 \ExplSyntaxOn
 \makeatletter
 
+%%
+%% preparation
+%%
+
+% constant variable
+\clist_const:Nn \c_tcb_doc_head_options_clist
+  { name, parameter, description, label }
+
+% local variables
+\clist_new:N \l_tcb_doc_labelnames_clist
+\clist_new:N \l_tcb_doc_cmdnames_clist
+\clist_new:N \l_tcb_doc_full_heads_clist
+\seq_new:N \l_tcb_doc_heads_seq
+
+% temp variables
+\clist_new:N \l_tcb_temp_clist
+\prop_new:N \l_tcb_temp_prop
+\seq_new:N \l_tcb_temp_seq
+\tl_new:N \l_tcb_temp_tl
+
+% variant form of expl3 function
+\cs_generate_variant:Nn \clist_put_right:Nn {Nv}
+
+% new tcb options
+\tcbset{
+  doc~ name/.store~ in=\kvtcb@doc@name,
+  doc~ parameter/.store~ in=\kvtcb@doc@parameter,
+  doc/para/.forward~ to=/tcb/doc~ parameter,
+  doc/desc/.forward~ to=/tcb/doc~ description,
+  doc/.unknown/.code = {
+    \meta_pgfkeys_prefix_forward_to:nVV {/tcb/doc~}
+      \pgfkeyscurrentname \pgfkeyscurrentvalue
+  }
+}
+
+% init new options
+\tcbset{doc~ name=, doc~ parameter=}
+
+% #1 = path and key prefix
+% #2 = key
+% #3 = value
+\cs_new:Nn \meta_pgfkeys_prefix_forward_to:nnn
+  {
+    \pgfkeysalso{#1 #2=#3}
+  }
+\cs_generate_variant:Nn \meta_pgfkeys_prefix_forward_to:nnn {nVV}
+
+
+%%
+%% {docCommands} env, poor syntax
+%%
+
 % #1 = tcb options
 % #2 = clist of 3-tuple, "{name}{para}{desc}, {}{}{}, ..."
 \NewDocumentEnvironment{docCommands}{ O{} m }
   {
-    % init \kvtcb@doc@label to empty
-    \tcbset{doc~ label=,#1}
+    \tcbset{#1}
     \begin{tcb@manual@entry}
-    \tcb_doc_heads:n {#2}
+    \tcb_doc_init_per_env:
+    \tcb_doc_parse_old_heads:n {#2}
     \nobreak\tcbset{before~ upper=}
     \kvtcb@doc@body@command@before
     \ignorespaces
@@ -22,80 +74,90 @@
     \end{tcb@manual@entry}
   }
 
-% list of no-duplication label names
-\clist_new:N \l_tcb_doc_labelnames_clist
-% list of no-duplication cmd names 
-\clist_new:N \l_tcb_doc_cmdnames_clist
-% seq of "{{name}{para}{dect}}"
-\seq_new:N \l_tcb_doc_heads_seq
+\cs_new:Nn \tcb_doc_init_per_env:
+  {
+    \clist_map_inline:Nn \c_tcb_doc_head_options_clist
+      { \tl_clear:c { kvtcb@doc@ ##1 } }
+  }
 
-% temp
-\tl_new:N \l_tcb_temp_tl
-\seq_new:N \l_tcb_temp_seq
+% convert list of "{name}{para}{desc}" to list of "{name=, para=, desc=}",
+% then call \tcb_doc_heads:V
+% #1 = clist of itmes "{name}{para}{desc}"
+\cs_new:Nn \tcb_doc_parse_old_heads:n
+  {
+    \clist_clear:N \l_tcb_temp_clist
+    \clist_map_inline:nn {#1}
+      { \tcb_doc_parse_old_tuple:nnn ##1 }
+    \tcb_doc_heads:V { \l_tcb_temp_clist }
+  }
+\cs_new:Nn \tcb_doc_parse_old_tuple:nnn
+  {
+    \clist_put_right:Nn \l_tcb_temp_clist
+      { {name=#1, para=#2, desc=#3, label=#1} }
+  }
 
-% call \tcb_doc_head:nnnn differently depending on the length of #1
-% #1 = clist of 3-tuple, "{name}{par}{desc}, {}{}{}, ..."
+% #1 = clist of items "{name=..., para=..., desc=...}"
 \cs_new:Nn \tcb_doc_heads:n
   {
     % init
-    \clist_clear:N \l_tcb_doc_cmdnames_clist
-    \clist_clear:N \l_tcb_doc_labelnames_clist
-
+    \clist_clear:N \l_tcb_doc_cmdnames_clist   % no-duplication label names
+    \clist_clear:N \l_tcb_doc_labelnames_clist % no-duplication cmd names
+    % call \tcb_doc_head_single:
     \seq_set_from_clist:Nn \l_tcb_doc_heads_seq {#1}
-    % store current head in \l_tcb_temp_tl
     \seq_pop_left:NN \l_tcb_doc_heads_seq \l_tcb_temp_tl
     \seq_if_empty:NTF \l_tcb_doc_heads_seq
-      {
-        % length == 1
-        \exp_after:wN \tcb_doc_head:nnnn \l_tcb_temp_tl {}
-      }{
-        % length >= 2
-        \exp_after:wN \tcb_doc_head:nnnn \l_tcb_temp_tl
-          {after~ skip=0pt, enlarge~ bottom~ by=0pt}
+      { % length == 1
+        \tcb_doc_head_single:V \l_tcb_temp_tl
+      }{ % length >= 2
+        \tcb_doc_head_first:V \l_tcb_temp_tl
         \seq_pop_right:NN \l_tcb_doc_heads_seq \l_tcb_temp_tl
         \seq_if_empty:NF \l_tcb_doc_heads_seq
-        {
-          % length >= 3
+        { % length >= 3
           \seq_map_inline:Nn \l_tcb_doc_heads_seq
-            {
-              \tcb_doc_head:nnnn ##1
-                {before~ skip=0pt, after~ skip=0pt, enlarge~ bottom~ by=0pt}
-            }
+            { \tcb_doc_head_middle:n {##1} }
         }
-        \exp_after:wN \tcb_doc_head:nnnn \l_tcb_temp_tl
-          {before~ skip=0pt}
+        \tcb_doc_head_last:V \l_tcb_temp_tl
       }
   }
 \cs_generate_variant:Nn \tcb_doc_heads:n {V}
 
-% execute single {tcb@doc@head} env
-% #1 = command csname
-% #2 = command parameters
-% #3 = command description
-% #4 = tcb options
-\cs_new:Nn \tcb_doc_head:nnnn
+% wrappers of \tcb_doc_head:nn
+\cs_new:Nn \tcb_doc_head_single:n
+  { \tcb_doc_head:nn {#1} {} }
+\cs_new:Nn \tcb_doc_head_first:n
+  { \tcb_doc_head:nn {#1} {after~ skip=0pt, enlarge~ bottom~ by=0pt} }
+\cs_new:Nn \tcb_doc_head_middle:n
+  { \tcb_doc_head:nn {#1} {before~ skip=0pt, after~ skip=0pt, enlarge~ bottom~ by=0pt} }
+\cs_new:Nn \tcb_doc_head_last:n
+  { \tcb_doc_head:nn {#1} {before~ skip=0pt} }
+\cs_generate_variant:Nn \tcb_doc_head_single:n { V }
+\cs_generate_variant:Nn \tcb_doc_head_first:n { V }
+\cs_generate_variant:Nn \tcb_doc_head_last:n { V }
+
+% expand to single {tcb@doc@head} env
+% #1 = options for command head
+% #2 = options for {tcb@doc@head} env
+\cs_new:Nn \tcb_doc_head:nn
   {
-    \tcbset{doc~ label=#1}
-    \begin{tcb@doc@head}{doc@head@command, #4}
+    \tcbset{doc/.cd, #1}
+    \begin{tcb@doc@head}{doc@head@command, #2}
     % it is better to append \strut inside \tcb@Print@Com
     \strut
-    \tcb@Print@Com{#1}
+    \tcb@Print@Com{\kvtcb@doc@name}
     % write no-duplicate indexes per environment
-    \clist_if_in:NnF \l_tcb_doc_cmdnames_clist { #1 }
+    \clist_if_in:NVF \l_tcb_doc_cmdnames_clist { \kvtcb@doc@name }
       {
-        \tcb@index@Com{#1}
-        \clist_gput_right:Nn \l_tcb_doc_cmdnames_clist { #1 }
+        \tcb@index@Com{\kvtcb@doc@name}
+        \clist_gput_right:NV \l_tcb_doc_cmdnames_clist { \kvtcb@doc@name }
       }
     % write no-duplicate labels per environment
     \clist_if_in:NVF \l_tcb_doc_labelnames_clist { \kvtcb@doc@label }
       {
-        \protected@edef\@currentlabel{\noexpand\tcb@cs{#1}}
+        \protected@edef\@currentlabel{\noexpand\tcb@cs{\kvtcb@doc@name}}
         \label{com:\kvtcb@doc@label}
         \clist_gput_right:NV \l_tcb_doc_labelnames_clist { \kvtcb@doc@label }
       }
-    {\ttfamily #2}
-    % more efficent than \tcbset{doc description=#3}
-    \gdef\kvtcb@doc@description{#3}
+    {\ttfamily \kvtcb@doc@parameter}
     \tcb@doc@do@description
     \end{tcb@doc@head}
   }
@@ -105,32 +167,15 @@
 %% a key-value scheme
 %%
 
-\ExplSyntaxOff
-% use consistent key & stored-in cmd names with option "doc description",
-% which is defined as
-%   doc description/.store in=\kvtcb@doc@description,%
-\tcbset{
-  doc name/.store in=\kvtcb@doc@name,
-  doc parameter/.store in=\kvtcb@doc@parameter,
-  % already defined
-  % doc description/.store~ in=\kvtcb@doc@description,
-  documentation/name/.forward to=/tcb/doc name,
-  documentation/para/.forward to=/tcb/doc parameter,
-  documentation/desc/.forward to=/tcb/doc description
-}
-
-% init to define stored-in commands
-\tcbset{documentation/.cd, name=, para=}
-\ExplSyntaxOn
-
 % #1 = tcb options
-% #2 = default cmd info, clist "name=..., para=..., desp=..."
-% #3 = variant cmd info, clist info-clist "name=..., para=..., desp=..."
-% see more discussion in https://github.com/T-F-S/tcolorbox/issues/89#issuecomment-570816807
+% #2 = default doc-head, clist "name=..., para=..., desp=..., label=..."
+% #3 = clist of variant doc-head
+% see more discussion in https://github.com/T-F-S/tcolorbox/issues/89
 \NewDocumentEnvironment{docCommands-keyvals}{ O{} m O{} }
   {
     \tcbset{#1}
     \begin{tcb@manual@entry}
+    \tcb_doc_init_per_env:
     % the only difference compared to {docCommands} env
     \tcb_doc_heads_kv:nn {#2} {#3}
     \nobreak\tcbset{before~ upper=}
@@ -143,44 +188,52 @@
     \end{tcb@manual@entry}
   }
 
-\clist_new:N \l_tcb_doc_heads_clist % store #1 of \tcb_doc_heads:n
-
 \cs_new:Nn \tcb_doc_heads_kv:nn
   {
     % init
-    \clist_clear:N \l_tcb_doc_heads_clist
+    \clist_clear:N \l_tcb_doc_full_heads_clist
     \clist_clear:N \l_tcb_doc_cmdnames_clist
-    \tl_clear:N \kvtcb@doc@name
-    \tl_clear:N \kvtcb@doc@parameter
-    \tl_clear:N \kvtcb@doc@description
-    % parse default cmd info, store results in \l_tcb_doc_heads_clist
+    % parse default doc-head, store results in \l_tcb_doc_full_heads_clist
     \tcb_doc_head_parse_kv:n {#1}
-    % parse variant cmd info, use extra group to achive inheriting
+    % parse variant doc-heads, use extra group to achive inheriting
     \clist_map_inline:nn {#2}
       { \group_begin: \tcb_doc_head_parse_kv:n {##1} \group_end: }
     % call \tcb_doc_heads:V
-    \tcb_doc_heads:V { \l_tcb_doc_heads_clist }
+    \tcb_doc_heads:V { \l_tcb_doc_full_heads_clist }
   }
 
-% parse kv list and append results to \l_tcb_doc_heads_clist
+% parse kv list and append results to \l_tcb_doc_full_heads_clist
 % #1 = kv list, "name=..., para=..., desc=..."
 \cs_new:Nn \tcb_doc_head_parse_kv:n
   {
-    \tcbset{documentation/.cd, #1}
-    % store item of \l_tcb_doc_heads_clist in \l_tcb_temp_seq
-    \seq_clear:N \l_tcb_temp_seq
-    \clist_map_inline:nn { name, parameter, description }
-      { \meta_seq_brace_put_right:Nv \l_tcb_temp_seq { kvtcb@doc@ ##1 } }
-    \clist_gput_right:Nx \l_tcb_doc_heads_clist
-      { \seq_use:Nn \l_tcb_temp_seq {} }
+    \tcbset{doc/.cd, #1}
+    % inner "doc label" inherits from "doc name", not the outer "doc label"
+    \prop_set_from_keyval:Nn \l_tcb_temp_prop {#1}
+    \prop_if_in:NnF \l_tcb_temp_prop {label}
+      { \let\kvtcb@doc@label\kvtcb@doc@name }
+    % append full doc-head clist (\l_tcb_temp_clist) to \l_tcb_doc_full_heads_clist
+    \clist_clear:N \l_tcb_temp_clist
+    \clist_map_inline:Nn \c_tcb_doc_head_options_clist
+      {
+        \meta_clist_put_kv_right:Nnv \l_tcb_temp_clist
+          {##1} { kvtcb@doc@ ##1 }
+      }
+    \meta_clist_brace_gput_right:NV \l_tcb_doc_full_heads_clist
+      { \l_tcb_temp_clist }
   }
 
-% put #2 right to seq #1, with extra pair of braces
-\cs_new:Nn \meta_seq_brace_put_right:Nn
+\cs_new:Nn \meta_clist_put_kv_right:Nnn
   {
-    \seq_put_right:Nn #1 { {#2} }
+    \clist_put_right:Nn #1 { #2 = #3 }
   }
-\cs_generate_variant:Nn \meta_seq_brace_put_right:Nn { Nv }
+\cs_generate_variant:Nn \meta_clist_put_kv_right:Nnn { Nnv }
+
+% put #2 right to clist #1, with extra pair of braces
+\cs_new:Nn \meta_clist_brace_gput_right:Nn
+  {
+    \clist_gput_right:Nn #1 { {#2} }
+  }
+\cs_generate_variant:Nn \meta_clist_brace_gput_right:Nn { NV }
 
 \makeatother
 \ExplSyntaxOff
