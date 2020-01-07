@@ -249,3 +249,7 @@ TSWLatexianTemp*
 
 # standalone packages
 *.sta
+
+## and more
+# created by bi-language-toc.tex
+*.tec

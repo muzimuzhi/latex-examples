@@ -1,0 +1,126 @@
+% ref: https://tex.stackexchange.com/a/170963/79060
+\documentclass{ctexbook}
+\usepackage[titles]{tocloft}
+\usepackage{xpatch}
+
+\makeatletter
+\ExplSyntaxOn
+
+\def\en@toc@ext{tec}
+\def\en@contentsname{Contents}
+
+
+%% two user commands
+\newcommand\enTableOfContents{
+  \begingroup
+    % restore \contentsname
+    \let\contentsname\en@contentsname
+    % restore behavior of \numberline
+    \let\CTEX@toc@width@n\@gobble
+    % adjust numwidth (required by long section numbers)
+    \addtolength\cftchapnumwidth{.3em}
+    \addtolength\cftsecnumwidth{.5em}
+    \addtolength\cftsubsecnumwidth{.8em}
+    % output en-toc
+    \@enTableOfContents
+  \endgroup
+}
+
+\newcommand\enSectionTitle[1]{
+  \def\@currentTitle{#1}
+}
+
+
+%% provide \@enTableOfContents
+\let\@enTableOfContents\tableofcontents
+\@ifundefined {chapter}
+  { % e.g., article.cls
+    \xpatchcmd\@enTableOfContents
+      {\@starttoc{toc}}
+      {\endgroup\@starttoc{\en@toc@ext}}
+      {}{\fail}
+  }
+  { % e.g., book.cls
+    \xpatchcmd\@enTableOfContents
+      {\chapter}
+      {
+        \begingroup
+        % restore to ctex's "scheme=plain"
+        \ctexset{
+          chapter/format = \Huge\bfseries\raggedright
+        }
+        \chapter
+      }
+      {}{\fail}
+    \xpatchcmd\@enTableOfContents
+      {\@starttoc{toc}}
+      {\endgroup\@starttoc{\en@toc@ext}}
+      {}{\fail}
+  }
+
+%% modify to write two toc entries
+\cs_set_protected:Npn \CTEX@addtocline #1#2
+  {
+    % write cn-toc entry
+    \addcontentsline { toc } {#1}
+      { \use:c { CTEX@#1@tocline } {#1} {#2} }
+    \begingroup
+      % restore to ctex's "scheme=plain"
+      \ctexset{
+        part/name      = {Part\space,},
+        part/number    = \Roman{part},
+      }
+      \@ifundefined {chapter}
+        {}
+        {
+          \ctexset{
+            chapter/name   = {,},
+            chapter/number = \arabic{chapter}
+          }
+        }
+      % write en-toc entry
+      \addcontentsline \en@toc@ext {#1}
+        { \use:c { CTEX@#1@tocline } {#1} { \@currentTitle } }
+    \endgroup
+  }
+
+\ExplSyntaxOff
+\makeatother
+
+\begin{document}
+\tableofcontents
+\enTableOfContents
+
+\enSectionTitle{Main body}
+\part{正文}
+
+\enSectionTitle{Introduction}
+\chapter{介绍}
+\makeatletter
+{\ttfamily\meaning\@enTableOfContents}
+\makeatother
+
+\setcounter{chapter}{10}
+
+\enSectionTitle{Introduction 2}
+\chapter{介绍}
+
+\enSectionTitle{Method and materials}
+\section{方法和材料}
+
+\setcounter{section}{9}
+\enSectionTitle{Method and materials 2}
+\section{方法和材料 2}
+
+\enSectionTitle{Data compilation}
+\subsection{数据搜集}
+
+\setcounter{subsection}{9}
+\enSectionTitle{Data compilation 2}
+\subsection{数据搜集 2}
+
+\setcounter{part}{12}
+\enSectionTitle{Appendix}
+\part{附录}
+
+\end{document}
