@@ -1,0 +1,96 @@
+\usepackage{hyperref}
+\usepackage{xpatch}
+
+\makeatletter
+\ExplSyntaxOn
+
+% list of label types (prefixes)
+\clist_new:N \hy_@linkcolor_clist
+
+
+%% new hyperref option "subcolorByLabelPrefix"
+\newif\ifHy@subcolorByLabelPrefix
+\Hy@subcolorByLabelPrefixfalse
+
+\define@key{Hyp}{subcolorByLabelPrefix}[true]{%
+  \Hy@boolkey{subcolorByLabelPrefix}{#1}%
+}
+
+
+%% new hyperref option "subcolor"
+% syntax: subcolor={<label prefix>}{<color>}
+\define@key{Hyp}{sublinkcolor}{
+  \Hy@newsubcolor{link}#1
+}
+
+% example: \Hy@newsubcolor{link}{sec}
+\def\Hy@newsubcolor#1#2{%
+  \exp_args:Nc \Hy@@newsubcolor {@ #1 color@ #2} {#1} {#2}
+}
+% example: \Hy@newsubcolor \@linkcolor@sec{link}{sec}{blue}
+\def\Hy@@newsubcolor#1#2#3#4{
+  \HyColor@HyperrefColor {#4} #1
+  \clist_put_left:cn {hy_@ #2 color_clist} {#3}
+}
+\ExplSyntaxOff
+
+
+% originally defined by "hyperref.sty", used by \hyperref[]{}
+% example: #1 = "\r@sec:key", #2 = "sec:key", #3 = "text"
+\xpatchcmd\label@@hyperref
+  {\hyper@@link}
+  {\HyRef@testlabeltype#2::\\\hyper@@link}
+  {}{\fail}
+
+% originally defined by "hyperref.sty", used by \autoref and \autopageref
+\xpatchcmd\HyRef@autosetref
+  {\HyRef@ShowKeysRef}
+  {\HyRef@testlabeltype#2::\\\HyRef@ShowKeysRef}
+  {}{\fail}
+
+% originally defined by "nameref.sty", used by \ref, \pageref, and \nameref
+% example: #1 = "\r@sec:key", #2 = "\@firstoffive", #3 = "sec:key"
+\xpatchcmd\@setref
+  {\ifx}
+  {\HyRef@testlabeltype#3::\\\ifx}
+  {}{\fail}
+
+% store label type in \CurrentLabelPrefix
+% example: \HyRef@testlabeltype sec:key::\\, \HyRef@testlabeltype key::\\
+\def\HyRef@testlabeltype#1:#2:#3\\{%
+  \PackageWarning{XXX}{#1,#2,#3}%
+  \ltx@ifempty{#2}{%
+    \PackageWarning{XXX}{empty, #1,#2,#3}%
+    \let\CurrentLabelPrefix\@empty
+  }{%
+    \ifHy@subcolorByLabelPrefix
+      \ltx@IfUndefined{@linkcolor@#1}{}{%
+        \def\CurrentLabelPrefix{#1}%
+      }%
+    \fi
+  }%
+}
+
+
+% originally defined by "hycolor.sty", used by all ref commands
+% example: #1 = "\@linkcolor"
+\xpatchcmd\HyColor@UseColor
+  {\expandafter}
+  {\Hy@setsubcolor{#1}\expandafter}
+  {}{\fail}
+
+\ExplSyntaxOn
+% example: \Hy@setsubcolor\@linkcolor
+\def\Hy@setsubcolor#1{
+  \clist_map_inline:cn { hy_ \cs_to_str:N #1 _clist }
+    {
+      \tl_set:Nn \l_tmpa_tl {##1}
+      \tl_if_eq:NNT \CurrentLabelPrefix \l_tmpa_tl
+        {
+          \tl_set_eq:Nc #1 { \cs_to_str:N #1 @##1 }
+          \clist_map_break:
+        }
+    }
+}
+\ExplSyntaxOff
+\makeatother

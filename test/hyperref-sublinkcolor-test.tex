@@ -1,0 +1,51 @@
+\documentclass{article}
+\usepackage{xcolor}
+
+\input{../utilities/hyperref-sublinkcolor}
+
+\hypersetup{
+  colorlinks,
+  subcolorByLabelPrefix,
+  % syntax: sublinkcolor={<label prefix>}{<color>}
+  sublinkcolor={sec}{blue},
+  sublinkcolor={eqn}{orange}
+}
+
+
+\begin{document}
+
+\ExplSyntaxOn
+\def\test#1{
+  \noindent\textbf{label name}:~ \texttt{#1}\par
+  \clist_map_inline:nn {ref, pageref, nameref, autoref, autopageref}
+    {
+      \texttt{\textbackslash ##1}:~
+      \tl_use:c {##1} {#1},~ starred~ \tl_use:c {##1} * {#1};~
+      normal~ label~ \tl_use:c {##1} {fig}\par
+    }
+  \texttt{\textbackslash hyperref}:~ \hyperref[#1]{link~ text}~
+  normal~ label~ \hyperref[fig]{link~ text}\par}
+\ExplSyntaxOff
+
+% ref labels
+\test{sec:key}
+\test{eqn:key}
+
+\hypersetup{sublinkcolor={sec}{teal}, sublinkcolor={eqn}{green}}
+\bigskip
+\test{sec:key}
+\test{eqn:key}
+
+
+% define labels
+\newpage
+\section{title}\label{sec:key}
+\begin{equation}
+  1+1\label{eqn:key}
+\end{equation}
+\begin{figure}[h]
+  \centering content
+  \caption{text}\label{fig}
+\end{figure}
+
+\end{document}
