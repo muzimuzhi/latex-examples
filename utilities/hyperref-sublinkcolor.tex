@@ -43,6 +43,8 @@
   {}{\fail}
 
 % originally defined by "hyperref.sty", used by \autoref and \autopageref
+% local, inside a group openned by \HyRef@autoref
+% example: #1 = "\hyper@@link", #2 = "sec:key"
 \xpatchcmd\HyRef@autosetref
   {\HyRef@ShowKeysRef}
   {\HyRef@testlabeltype#2::\\\HyRef@ShowKeysRef}
@@ -58,9 +60,7 @@
 % store label type in \CurrentLabelPrefix
 % example: \HyRef@testlabeltype sec:key::\\, \HyRef@testlabeltype key::\\
 \def\HyRef@testlabeltype#1:#2:#3\\{%
-  \PackageWarning{XXX}{#1,#2,#3}%
   \ltx@ifempty{#2}{%
-    \PackageWarning{XXX}{empty, #1,#2,#3}%
     \let\CurrentLabelPrefix\@empty
   }{%
     \ifHy@subcolorByLabelPrefix
@@ -94,3 +94,41 @@
 }
 \ExplSyntaxOff
 \makeatother
+
+\endinput
+
+
+% why we must insert \HyRef@testlabeltype three different places
+\hyperref[sec:key]{text}
+  \label@hyperref[{sec:key}]{text}% <- patch here
+    \label@@hyperref\r@sec:key {key}{text}
+      \hyper@@link{\expandafter\@fifthoffive\r@sec:key}%
+                  {\expandafter\@fourthoffive\r@sec:key \@empty\@empty}
+                  {text}%
+        % \hyper@link@[link]{...}{...}{...}
+        %   \hyper@link{link}{section.1}{text}
+            % \find@pdflink{link}{section.1}text\Hy@xspace@end\close@pdflink
+            %   \pdfstartlink attr{/Border[0 0 0]/H/I/C[1 0 0]}goto name{section.1}
+            %   \Hy@colorlink\@linkcolor
+            %   text\Hy@xspace@end\close@pdflink
+
+
+\autoref{sec:key}
+  \HyRef@autoref\hyper@@link{sec:key}
+    \HyRef@autosetref \r@sec:key {sec:key}{\hyper@@link}% <- patch here
+      \hyper@@link{\expandafter\@fifthoffive\r@sec:key \@empty\@empty\@empty}
+                  {\expandafter\@fourthoffive\r@sec:key \@empty\@empty\@empty}
+                  {\HyRef@currentHtag
+                  \expandafter\@firstoffive\r@sec:key \@empty\@empty\@empty
+                  \null}
+        % \hyper@link@[link]{...}{...}{...}
+        %   \hyper@link{link}{section.1}{...}
+
+
+\ref{sec:key}
+  \T@ref{sec:key}
+    \NR@setref{sec:key}\@firstoffive{sec:key}
+      \NR@@setref\r@sec:key \@firstoffive {sec:key}
+        \@setref\r@sec:key \@firstoffive{sec:key}% <- patch here
+          \Hy@setref@link{1}{2}{title}{section.1}{}\@empty\@empty\@nil\@firstoffive
+            \hyper@@link{}{secion.1}{1}
