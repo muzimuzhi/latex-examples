@@ -28,6 +28,7 @@
 
 \newcommand\enSectionTitle[1]{
   \def\@currentTitle{#1}
+  \ignorespaces
 }
 
 
@@ -96,9 +97,6 @@
 
 \enSectionTitle{Introduction}
 \chapter{介绍}
-\makeatletter
-{\ttfamily\meaning\@enTableOfContents}
-\makeatother
 
 \setcounter{chapter}{10}
 
