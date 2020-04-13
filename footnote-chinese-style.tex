@@ -2,31 +2,35 @@
 \usepackage{xpatch}
 \usepackage{xunicode-addon}
 
-% set char class and font for circled numbers
-% ref: https://stone-zeng.github.io/2019-02-09-circled-numbers
-\xeCJKDeclareCharClass{Default}{"24EA, "2460->"2473, "3251->"32BF}
-\newfontfamily\EnclosedNumbers{Source Han Serif SC}
 
-% patch \textcircled
+% use specific font inside \textcircled
+% ref: https://stone-zeng.github.io/2019-02-09-circled-numbers
 \AtBeginUTFCommand[\textcircled]{\begingroup\EnclosedNumbers}
 \AtEndUTFCommand[\textcircled]{\endgroup}
 
+% set char class and font for circled numbers
+\xeCJKDeclareCharClass{Default}{"24EA, "2460->"2473, "3251->"32BF}
+\newfontfamily\EnclosedNumbers{Source Han Serif SC}
+
 \makeatletter
-% add wrapper \textcircled,
-% adapted from latex.ltx, line 6380:
+% output counter "footnote" in circled number style
 \renewcommand\thefootnote{\textcircled{\@arabic\c@footnote}}
 
-% use separate footnote mark command
+
+% cancel the superscript style of counter used in footnote text
 \xpatchcmd\@makefntext
-  {\hb@xt@1.8em{\hss\@makefnmark}}
-  {\hb@xt@1.8em{\hss\@makefnmarkNormal}\space}
+  {{\hss\@makefnmark}}
+  {{\hss\@makefnmark@nosuperscript}\space}
   {}{\fail}
 
-% use non-suprescript style with lower baseline
-% adapted from latex.ltx, line 6383:
-\def\@makefnmarkNormal{\lower .3ex \hbox{\normalfont\@thefnmark}}
+% old: superscript style
+% \def\@makefnmark{\hbox{\@textsuperscript{\normalfont\@thefnmark}}}
 
-% make footnote rule shorter
+% new: normal style, lower baseline
+\def\@makefnmark@nosuperscript{\lower .3ex \hbox{\normalfont\@thefnmark}}
+
+
+% shorten footnote rule
 \xpatchcmd\footnoterule
   {.4\columnwidth}
   {1in}
@@ -34,7 +38,6 @@
 \makeatother
 
 \begin{document}
-
 一二三\footnote{text}
 
 \addtocounter{footnote}{20}
@@ -42,5 +45,4 @@
 
 \addtocounter{footnote}{20}
 七八九\footnote{text}
-
 \end{document}
