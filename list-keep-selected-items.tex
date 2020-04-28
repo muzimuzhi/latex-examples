@@ -10,41 +10,47 @@
 
 \tl_new:N  \l_item_temp_tl
 \seq_new:N \l_list_body_seq
-\seq_new:N \l_list_new_body_seq
+\tl_new:N  \l_list_new_body_tl
 \seq_new:N \l_list_keep_items_seq
 \int_new:N \l_items_count_int
 
-\RenewDocumentEnvironment{enumerate}{ o b }{
+\RenewDocumentEnvironment{enumerate}{ b }{
   \int_set:Nn \l_items_count_int {0}
-  \seq_clear:N \l_list_new_body_seq
+  \tl_clear:N \l_list_new_body_tl
   
-  \seq_set_split:Nnn \l_list_body_seq {\item} {#2}
-  
-  \seq_pop_left:NN \l_list_body_seq \l_item_temp_tl
-  \tl_if_blank:VF \l_item_temp_tl {ERROR}
-  
-  \seq_map_inline:Nn \l_list_body_seq
+  \seq_if_empty:NTF \l_list_keep_items_seq
     {
-      \int_incr:N \l_items_count_int
-      \seq_pop_left:NN \l_list_body_seq \l_item_temp_tl
-      % O(mn) time complexity. Can be O(n).
-      \seq_if_in:NVTF \l_list_keep_items_seq \l_items_count_int
+      \tl_set:Nn \l_list_new_body_tl {#1}
+    }
+    {
+      % do not support nested list environments
+      \seq_set_split:Nnn \l_list_body_seq {\item} {#1}
+
+      % contents before first \item, should be blank or env options
+      \seq_pop_left:NN \l_list_body_seq \l_list_new_body_tl
+
+      % O(mn) time complexity. Can be O(n+m)
+      \seq_map_inline:Nn \l_list_body_seq
         {
-          \seq_put_right:Nn \l_list_new_body_seq {\item}
-          \seq_put_right:NV \l_list_new_body_seq \l_item_temp_tl
+          \int_incr:N \l_items_count_int
+          \seq_if_in:NVTF \l_list_keep_items_seq \l_items_count_int
+            {
+              \tl_put_right:Nn \l_list_new_body_tl {\item ##1}
+            }
+            {
+              % assume this is the first level
+              \tl_put_right:Nn \l_list_new_body_tl { \stepcounter{enumi} }
+            }
         }
-        {
-          \seq_put_right:Nn \l_list_new_body_seq { \stepcounter{enumi} }
-        }
+      \seq_gclear:N \l_list_keep_items_seq
     }
 }{
-  \tl_if_novalue:nTF {#1}
-    { \begin{enumerate@backup} }
-    { \begin{enumerate@backup}[#1] }
-    \seq_use:Nn \l_list_new_body_seq {}
+  \begin{enumerate@backup}
+    \l_list_new_body_tl
   \end{enumerate@backup}
 }
 
+% do not support int ranges
 \NewDocumentCommand{\keepItems}{m}{
   \seq_set_split:Nnn \l_list_keep_items_seq {,} {#1}
 }
@@ -53,13 +59,18 @@
 
 \begin{document}
 \keepItems{2,6}
-\begin{enumerate}
+\begin{enumerate}%[a]
   \item 1
   \item 2
   \item 3
   \item 4
   \item 5
   \item 6
+\end{enumerate}
+
+\begin{enumerate}
+  \item 1
+  \item 2
 \end{enumerate}
 
 \keepItems{1,5}
