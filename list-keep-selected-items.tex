@@ -1,65 +1,104 @@
 \documentclass{article}
+\usepackage{enumitem}
 \usepackage{xparse}
 
 \makeatletter
-\let\enumerate@backup\enumerate
+\let\enumerate@backup   \enumerate
 \let\endenumerate@backup\endenumerate
 
 \ExplSyntaxOn
-\tl_new:N \l_enumerate_body_tl
-
 \tl_new:N  \l_item_temp_tl
 \seq_new:N \l_list_body_seq
-\seq_new:N \l_list_new_body_seq
-\seq_new:N \l_list_keep_items_seq
+\tl_new:N  \l_list_new_body_tl
+\seq_new:N \l_list_kept_items_seq
 \int_new:N \l_items_count_int
 
-\RenewDocumentEnvironment{enumerate}{ o b }{
-  \int_set:Nn \l_items_count_int {0}
-  \seq_clear:N \l_list_new_body_seq
-  
-  \seq_set_split:Nnn \l_list_body_seq {\item} {#2}
-  
-  \seq_pop_left:NN \l_list_body_seq \l_item_temp_tl
-  \tl_if_blank:VF \l_item_temp_tl {ERROR}
-  
-  \seq_map_inline:Nn \l_list_body_seq
-    {
-      \int_incr:N \l_items_count_int
-      \seq_pop_left:NN \l_list_body_seq \l_item_temp_tl
-      % O(mn) time complexity. Can be O(n).
-      \seq_if_in:NVTF \l_list_keep_items_seq \l_items_count_int
+\cs_new_nopar:Npn \enumerate_use_kept_items:
+  {
+    % O(m+n) time complexity, 
+    % where n = number of items in list, m = length of kept_items_seq
+    \RenewDocumentEnvironment{enumerate}{ +b }{
+      \tl_clear:N \l_list_new_body_tl % not necessary
+      
+      \seq_if_empty:NTF \l_list_kept_items_seq
         {
-          \seq_put_right:Nn \l_list_new_body_seq {\item}
-          \seq_put_right:NV \l_list_new_body_seq \l_item_temp_tl
+          \tl_set:Nn \l_list_new_body_tl {##1}
         }
         {
-          \seq_put_right:Nn \l_list_new_body_seq { \stepcounter{enumi} }
+          % parse kept_items_seq
+          % recovering value from l3prop variable requires linear time, but
+          % I want a constant time implementation.
+          \seq_map_inline:Nn \l_list_kept_items_seq
+            {
+              % ensure that ####1 IS an int expression
+              % \int_set:Nn \l_tmpa_int {####1}
+              \tl_set_eq:cN {l_kept_item_ ####1} \c_novalue_tl
+            }
+          
+          % nested list environments is not supported
+          \seq_set_split:Nnn \l_list_body_seq {\item} {##1}
+    
+          % contents before first \item, should be blank or env options
+          \seq_pop_left:NN \l_list_body_seq \l_list_new_body_tl
+          
+          \int_zero:N \l_items_count_int
+          \seq_map_inline:Nn \l_list_body_seq
+            {
+              \int_incr:N \l_items_count_int
+              \tl_if_eq:cNTF 
+                {l_kept_item_ \int_use:N \l_items_count_int} \c_novalue_tl
+                {
+                  \tl_put_right:Nn \l_list_new_body_tl {\item ####1}
+                }
+                {
+                  % assume this is the first level
+                  \tl_put_right:Nn \l_list_new_body_tl { \stepcounter{enumi} }
+                }
+            }
+          
+          % clear kept_items and restore parsing
+          \seq_gclear:N \l_list_kept_items_seq
+          \seq_map_inline:Nn \l_list_kept_items_seq
+            {
+              \tl_clear:c {l_kept_item_ ####1}
+            }
         }
+    }{
+      % to support the optional argument detection
+      \tl_put_left:Nn  \l_list_new_body_tl { \begin{enumerate@backup} }
+      \tl_put_right:Nn \l_list_new_body_tl { \end{enumerate@backup} }
+      \l_list_new_body_tl
+      
+      \let\enumerate   \enumerate@backup
+      \let\endenumeraet\endenumerate@backup
     }
-}{
-  \tl_if_novalue:nTF {#1}
-    { \begin{enumerate@backup} }
-    { \begin{enumerate@backup}[#1] }
-    \seq_use:Nn \l_list_new_body_seq {}
-  \end{enumerate@backup}
+  }
+
+
+% do not support int ranges
+\NewDocumentCommand{\keepItems}{m}{
+  \seq_set_split:Nnn \l_list_kept_items_seq {,} {#1}
+  \enumerate_use_kept_items:
 }
 
-\NewDocumentCommand{\keepItems}{m}{
-  \seq_set_split:Nnn \l_list_keep_items_seq {,} {#1}
-}
 \ExplSyntaxOff
 \makeatother
 
 \begin{document}
 \keepItems{2,6}
-\begin{enumerate}
-  \item 1
-  \item 2
+\begin{enumerate}[label=\roman*]
+  \item 1 \par 11
+  \item 2 \par 22
   \item 3
   \item 4
   \item 5
   \item 6
+\end{enumerate}
+
+\begin{enumerate}
+  \item x
+  \item y
+  \item z
 \end{enumerate}
 
 \keepItems{1,5}
@@ -72,3 +111,9 @@
   \item 6
 \end{enumerate}
 \end{document}
+
+Possible refinements:
+ - Support itemize and description
+ - Support int ranges (general functions?)
+ - Support verbatim contents (scontents package?)
+ - Support nested lists (?)
