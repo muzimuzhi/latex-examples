@@ -17,7 +17,7 @@
   {
     % O(m+n) time complexity, 
     % where n = number of items in list, m = length of kept_items_seq
-    \RenewDocumentEnvironment{enumerate}{ b }{
+    \RenewDocumentEnvironment{enumerate}{ +b }{
       \tl_clear:N \l_list_new_body_tl % not necessary
       
       \seq_if_empty:NTF \l_list_kept_items_seq
@@ -26,10 +26,12 @@
         }
         {
           % parse kept_items_seq
+          % recovering value from l3prop variable requires linear time, but
+          % I want a constant time implementation.
           \seq_map_inline:Nn \l_list_kept_items_seq
             {
-              % ensure that ##1 IS an int expression
-              % \int_set:Nn \l_tmpa_int {##1}
+              % ensure that ####1 IS an int expression
+              % \int_set:Nn \l_tmpa_int {####1}
               \tl_set_eq:cN {l_kept_item_ ####1} \c_novalue_tl
             }
           
@@ -85,8 +87,8 @@
 \begin{document}
 \keepItems{2,6}
 \begin{enumerate}[label=\roman*]
-  \item 1
-  \item 2
+  \item 1 \par 11
+  \item 2 \par 22
   \item 3
   \item 4
   \item 5
