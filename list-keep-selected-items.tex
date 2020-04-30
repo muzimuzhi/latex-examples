@@ -1,65 +1,90 @@
 \documentclass{article}
+\usepackage{enumitem}
 \usepackage{xparse}
 
 \makeatletter
-\let\enumerate@backup\enumerate
+\let\enumerate@backup   \enumerate
 \let\endenumerate@backup\endenumerate
 
 \ExplSyntaxOn
-\tl_new:N \l_enumerate_body_tl
-
 \tl_new:N  \l_item_temp_tl
 \seq_new:N \l_list_body_seq
 \tl_new:N  \l_list_new_body_tl
-\seq_new:N \l_list_keep_items_seq
+\seq_new:N \l_list_kept_items_seq
 \int_new:N \l_items_count_int
 
-\RenewDocumentEnvironment{enumerate}{ b }{
-  \int_set:Nn \l_items_count_int {0}
-  \tl_clear:N \l_list_new_body_tl
-  
-  \seq_if_empty:NTF \l_list_keep_items_seq
-    {
-      \tl_set:Nn \l_list_new_body_tl {#1}
-    }
-    {
-      % do not support nested list environments
-      \seq_set_split:Nnn \l_list_body_seq {\item} {#1}
-
-      % contents before first \item, should be blank or env options
-      \seq_pop_left:NN \l_list_body_seq \l_list_new_body_tl
-
-      % O(mn) time complexity. Can be O(n+m)
-      \seq_map_inline:Nn \l_list_body_seq
+\cs_new_nopar:Npn \enumerate_use_kept_items:
+  {
+    % O(m+n) time complexity, 
+    % where n = number of items in list, m = length of kept_items_seq
+    \RenewDocumentEnvironment{enumerate}{ b }{
+      \tl_clear:N \l_list_new_body_tl % not necessary
+      
+      \seq_if_empty:NTF \l_list_kept_items_seq
         {
-          \int_incr:N \l_items_count_int
-          \seq_if_in:NVTF \l_list_keep_items_seq \l_items_count_int
+          \tl_set:Nn \l_list_new_body_tl {##1}
+        }
+        {
+          % parse kept_items_seq
+          \seq_map_inline:Nn \l_list_kept_items_seq
             {
-              \tl_put_right:Nn \l_list_new_body_tl {\item ##1}
+              % ensure that ##1 IS an int expression
+              % \int_set:Nn \l_tmpa_int {##1}
+              \tl_set_eq:cN {l_kept_item_ ####1} \c_novalue_tl
             }
+          
+          % nested list environments is not supported
+          \seq_set_split:Nnn \l_list_body_seq {\item} {##1}
+    
+          % contents before first \item, should be blank or env options
+          \seq_pop_left:NN \l_list_body_seq \l_list_new_body_tl
+          
+          \int_zero:N \l_items_count_int
+          \seq_map_inline:Nn \l_list_body_seq
             {
-              % assume this is the first level
-              \tl_put_right:Nn \l_list_new_body_tl { \stepcounter{enumi} }
+              \int_incr:N \l_items_count_int
+              \tl_if_eq:cNTF 
+                {l_kept_item_ \int_use:N \l_items_count_int} \c_novalue_tl
+                {
+                  \tl_put_right:Nn \l_list_new_body_tl {\item ####1}
+                }
+                {
+                  % assume this is the first level
+                  \tl_put_right:Nn \l_list_new_body_tl { \stepcounter{enumi} }
+                }
+            }
+          
+          % clear kept_items and restore parsing
+          \seq_gclear:N \l_list_kept_items_seq
+          \seq_map_inline:Nn \l_list_kept_items_seq
+            {
+              \tl_clear:c {l_kept_item_ ####1}
             }
         }
-      \seq_gclear:N \l_list_keep_items_seq
+    }{
+      % to support the optional argument detection
+      \tl_put_left:Nn  \l_list_new_body_tl { \begin{enumerate@backup} }
+      \tl_put_right:Nn \l_list_new_body_tl { \end{enumerate@backup} }
+      \l_list_new_body_tl
+      
+      \let\enumerate   \enumerate@backup
+      \let\endenumeraet\endenumerate@backup
     }
-}{
-  \begin{enumerate@backup}
-    \l_list_new_body_tl
-  \end{enumerate@backup}
-}
+  }
+
 
 % do not support int ranges
 \NewDocumentCommand{\keepItems}{m}{
-  \seq_set_split:Nnn \l_list_keep_items_seq {,} {#1}
+  \seq_set_split:Nnn \l_list_kept_items_seq {,} {#1}
+  \enumerate_use_kept_items:
 }
+
 \ExplSyntaxOff
 \makeatother
 
 \begin{document}
 \keepItems{2,6}
-\begin{enumerate}%[a]
+\begin{enumerate}[label=\roman*]
   \item 1
   \item 2
   \item 3
@@ -69,8 +94,9 @@
 \end{enumerate}
 
 \begin{enumerate}
-  \item 1
-  \item 2
+  \item x
+  \item y
+  \item z
 \end{enumerate}
 
 \keepItems{1,5}
