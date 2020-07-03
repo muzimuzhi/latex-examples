@@ -2,7 +2,6 @@
 \RequirePackage{xcolor}
 
 \newcommand{\printDef}[1]{%
-%  \addvspace{\topsep}%
   \begingroup
   \ttfamily
   % output command
@@ -10,9 +9,9 @@
   \textbackslash\Verb*|#1|%
   \normalcolor\par
   % output definition of \cs{#1}
-  \expandafter\let\expandafter\temp\csname #1\endcsname
-  \list{}{\leftmargin=2em\topsep=0pt\parsep=0pt\partopsep=0pt}
-  \item[]\meaning\temp
+  \toString{#1}%
+  \list{}{\leftmargin=2em\topsep=0pt\parsep=0pt\partopsep=0pt}%
+  \item[]\expandafter\meaning\csname \csname l_tmpa_tl\endcsname\endcsname
   \endlist
   \endgroup
   \vskip\topsep
@@ -28,3 +27,14 @@
   \endgroup
   #1%
 }
+
+% add \string in front of each token in #1
+% based on https://tex.stackexchange.com/a/44444
+\ExplSyntaxOn
+\cs_new:Npn \toString #1
+  {
+    \tl_set:Nn \l_tmpa_tl {#1}
+    \regex_replace_all:nnN { . } { \c{string} \0 } \l_tmpa_tl
+    \tl_set:Nx \l_tmpa_tl { \l_tmpa_tl }
+  }
+\ExplSyntaxOff

@@ -3,11 +3,12 @@
 
 \input ../utilities/print-definition
 
+
 \begin{document}
 
-\printAndRunCode{\newenvironment{abc}{begdef}{enddef}}
-\printDef{abc}
-\printDef{endabc}
+\printAndRunCode{\newcommand{\cmd}[1][x]{def}}
+\printDef{cmd}
+\printDef{\cmd}
 
 \printAndRunCode{\newenvironment{abc*}{begdef}{enddef}}
 \printDef{abc*}
