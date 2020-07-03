@@ -1,0 +1,26 @@
+\documentclass{article}
+\usepackage{xparse}
+
+\input ../utilities/print-definition
+
+\begin{document}
+
+\printAndRunCode{\newenvironment{abc}{begdef}{enddef}}
+\printDef{abc}
+\printDef{endabc}
+
+\printAndRunCode{\newenvironment{abc*}{begdef}{enddef}}
+\printDef{abc*}
+\printDef{endabc*}
+
+\printAndRunCode{\NewDocumentCommand{\xyz}{s}{def}}
+\printDef{xyz code}
+
+\printAndRunCode{\NewDocumentEnvironment{pqr}{s}{begindef}{enddef}}
+
+\printDef{pqr}
+\printDef{endpqr}
+\printDef{environment pqr code}
+\printDef{environment pqr end aux }
+
+\end{document}

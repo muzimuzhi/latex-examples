@@ -1,0 +1,30 @@
+\RequirePackage{fvextra}
+\RequirePackage{xcolor}
+
+\newcommand{\printDef}[1]{%
+%  \addvspace{\topsep}%
+  \begingroup
+  \ttfamily
+  % output command
+  \noindent\hspace*{-\parindent}\color{blue}%
+  \textbackslash\Verb*|#1|%
+  \normalcolor\par
+  % output definition of \cs{#1}
+  \expandafter\let\expandafter\temp\csname #1\endcsname
+  \list{}{\leftmargin=2em\topsep=0pt\parsep=0pt\partopsep=0pt}
+  \item[]\meaning\temp
+  \endlist
+  \endgroup
+  \vskip\topsep
+}
+
+\newcommand{\printAndRunCode}[1]{%
+  \addvspace{2\topsep}%
+  \begingroup
+  \ttfamily
+  \noindent\hspace*{-\parindent}\color{orange}%
+  \Verb*|#1|%
+  \normalcolor\par
+  \endgroup
+  #1%
+}
