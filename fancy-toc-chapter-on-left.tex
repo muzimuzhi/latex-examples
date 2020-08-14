@@ -1,0 +1,152 @@
+% see https://zhuanlan.zhihu.com/p/176992118
+\documentclass{book}
+% actually skins lib will load tikz pkg, but for edior completion ...
+\usepackage{tikz}
+  \usetikzlibrary{positioning}
+\usepackage{tcolorbox}
+  \tcbuselibrary{skins}
+\usepackage{hyperref}
+  \hypersetup{colorlinks}
+\usepackage{regexpatch}
+
+
+\makeatletter
+
+\newtcolorbox{tocchap}[1]{%
+  enhanced,
+  % box
+  beforeafter skip=0pt,
+  width=.6\linewidth,
+  flush right,
+  frame empty,
+  interior empty,
+  % overlay drawing
+  overlay={
+    % left line
+    \draw[line width=2pt, cyan] ([yshift=-15pt]frame.north west) -- ([yshift=15pt]frame.south west);
+    % title
+    % hskip between title and left line is caused by tikz option `node distance`
+    \node[left=of frame] {\tcbtitle};
+  },
+  % title
+  detach title,
+  coltitle=cyan,
+  fonttitle=\large,
+  title={\parbox{100pt}{\centering #1}},
+}
+
+
+\newif\if@first@chapter
+\@first@chaptertrue
+
+% wrap toc entries lower than chapter in `tocchap` env
+%
+% expected .toc file after patch:
+%    \contentsline {chapter}{\numberline {1}title}{2}%
+%    \begin {tocchap}{\@currentchapter }%
+%    \contentsline {section}{\numberline {1.1}title}{2}%
+%    \contentsline {section}{\numberline {1.2}title}{2}%
+%    \end {tocchap}%
+
+%% default definition of \addcontentsline:
+%%
+%% #1 = one of aux extension, e.g., "toc", "lof", ...
+%% #2 = toc entry name, e.g., chapter, section, table, ...
+%% #3 = toc entry title, e.g., \numberline{...}...
+%%
+%\def\addcontentsline#1#2#3{%
+%  \addtocontents{#1}{\protect\contentsline{#2}{#3}{\thepage}%
+%                     \protected@file@percent}}
+
+\xpretocmd\addcontentsline{%
+  \expandafter\ifx\csname the#2\endcsname\thechapter
+    \if@first@chapter
+      \global\@first@chapterfalse
+    \else
+      \addtocontents{#1}{\protect\end{tocchap}\protected@file@percent}%
+    \fi
+  \fi
+}{}{\fail}
+
+\xapptocmd\addcontentsline{%
+  \expandafter\ifx\csname the#2\endcsname\thechapter
+    \addtocontents{#1}{\protect\begin{tocchap}{\protect\@currentchapter}\protected@file@percent}
+  \fi%
+}{}{\fail}
+
+\AtEndDocument{%
+  \addtocontents{toc}{\protect\end{tocchap}\protected@file@percent}%
+}
+
+
+% store chapter title in \@currentchapter
+\renewcommand*\l@chapter[2]{\def\@currentchapter{\let\numberline\@gobble#1}}
+% reduce left skip of \l@section
+\renewcommand*\l@section{\@dottedtocline{1}{0em}{2.3em}}
+
+
+%%
+%% allow title and page parts in toc entries to use different link style
+%%
+\@ifpackageloaded{hyperref}{
+  % patch for toc title
+  \xpatchcmd*\contentsline
+    {\hyper@linkstart{link}{\Hy@tocdestname}{#2}\hyper@linkend}
+    {%
+      \begingroup
+        \csname Hy@tocstyle@title@#1\endcsname
+        \hyper@linkstart{link}{\Hy@tocdestname}{#2}\hyper@linkend
+      \endgroup
+    }
+    {}{\fail}
+  
+  % patch for toc page number
+  \xpatchcmd*\contentsline
+    {\hyper@linkstart{link}{\Hy@tocdestname}{#3}\hyper@linkend}
+    {%
+      \begingroup
+        \csname Hy@tocstyle@page@#1\endcsname
+        \hyper@linkstart{link}{\Hy@tocdestname}{#3}\hyper@linkend
+      \endgroup
+    }
+    {}{\fail}
+  
+  % set link style for toc level "chapter" and "section", title part
+  \def\Hy@tocstyle@title@chapter{%
+    \Hy@hidelinks
+  }
+  \def\Hy@tocstyle@title@section{%
+    \Hy@hidelinks
+  }
+  
+  % similar to definition of hyperref option "hidelinks"
+  \def\Hy@hidelinks{%
+    \Hy@colorlinksfalse
+    \Hy@ocgcolorlinksfalse
+    \Hy@frenchlinksfalse
+    \let\Hy@colorlink   \Hy@colorlink@empty
+    \let\Hy@endcolorlink\Hy@endcolorlink@empty
+    \let\@pdfborder     \@pdfborder@empty
+    \let\@pdfborderstyle\@pdfborderstyle@empty
+  }
+  
+  % hyperref constants
+  \def\Hy@colorlink@empty #1{\begingroup}
+  \def\Hy@endcolorlink@empty{\endgroup}
+  \def\@pdfborder@empty     {0 0 0}
+  \let\@pdfborderstyle@empty\ltx@empty
+} % end of true part of \@ifpackageloaded{hyperref} 
+{}
+
+\makeatother
+
+\begin{document}
+\tableofcontents
+
+\chapter{Title}
+\section{title} \section{title}
+
+\chapter[Long long long \protect\\long title]{Long long long long title}
+\section{title} \section{title}
+\section{title} \section{title}
+\end{document}
