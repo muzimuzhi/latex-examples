@@ -1,0 +1,31 @@
+\documentclass{article}
+\usepackage{pgffor}
+
+\input{../utilities/hyperref-autonameref.tex}
+
+\hypersetup{colorlinks, linkcolor=blue}
+
+\makeatletter
+\def\HyRef@autonameref@style#1{``#1''}
+\makeatother
+
+\begin{document}
+
+\parindent=0pt
+
+Test \verb|\autonameref|\par
+\foreach \i in {sec, sec2, sec3} {
+  see \autonameref{\i} on \autopageref{\i} \par
+}
+\bigskip
+
+Test starred form\par
+\foreach \i in {sec, sec2, sec3} {
+  see \autonameref*{\i} on \autopageref*{\i} \par
+}
+
+\section{title}\label{sec}
+\subsection{subtitle}\label{sec2}
+\subsubsection{subsubtitle}\label{sec3}
+
+\end{document}

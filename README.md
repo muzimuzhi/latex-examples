@@ -21,6 +21,7 @@ Typical configured usage
  - modified
    - `\theFancyVerbLine`
 
+
 ## [`utilities/print-definition.tex`](utilities/print-definition.tex)
 
 ### User Interface
@@ -34,12 +35,23 @@ Typical configured usage
  - added
    - `\toString`
 
+
 ## [`utilities/pgfkeys-handler-patch.tex`](utilities/pgfkeys-handler-patch.tex)
 
 ### User Interface
-
  - `\pgfkeys{<key>/.patch={<search>}{<replace>}}`
  - `\pgfkeyspatchvalue{<key path>}{<search>}{<replace>}`
 
 ### Internals
  - direct dependency: `xpatch`
+
+
+## [`utilities/hyperref-autonameref.tex`](utilities/hyperref-autonameref.tex)
+
+### User Interface
+  - `\autonameref{<label key>}` and `\autonameref*{<label key>}`
+  - 1-arg `\HyRef@autonameref@style` which controls the extra output style (see [test file](test/hyperref-autonameref-test.tex))
+
+### Internals
+  - direct dependency: `hyperref`
+  - `\HyRef@autonameref` and `\HyRef@autonamesetref`

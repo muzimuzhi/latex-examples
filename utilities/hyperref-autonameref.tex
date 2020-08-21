@@ -1,0 +1,56 @@
+% LaTeX kernel provides
+%    \ref and \pageref,
+% hyperref (with nameref) adds
+%    \autoref,      which acts like "<ref name>~\ref"
+%    \autonameref,  which acts like "page~\pageref"
+% and
+%    \nameref,      which prints the sectioning title.
+% This tiny tex file adds
+%    \autonameref,  which acts like "<ref name>~\nameref"
+% (originally developped for https://github.com/pgf-tikz/pgfplots/issues/367)
+
+\RequirePackage{hyperref}
+
+\makeatletter
+% similar to definitions of \autoref, \HyRef@autoref, and \HyRef@autosetref
+\DeclareRobustCommand*{\autonameref}{%
+  \leavevmode
+  \@ifstar{\HyRef@autonameref\@gobbletwo}{\HyRef@autonameref\hyper@@link}%
+}
+
+\def\HyRef@autonameref#1#2{%
+  \begingroup
+    \Hy@safe@activestrue
+    \expandafter\HyRef@autonamesetref\csname r@#2\endcsname{#2}{#1}%
+  \endgroup
+}
+
+\def\HyRef@autonamesetref#1#2#3{% link command, csname, refname
+  \HyRef@ShowKeysRef{#2}%
+  \ifcase 0\ifx#1\relax 1\fi\ifx#1\Hy@varioref@undefined 1\fi\relax
+    \edef\HyRef@thisref{%
+      \expandafter\@fourthoffive#1\@empty\@empty\@empty
+    }%
+    \expandafter\HyRef@testreftype\HyRef@thisref.\\%
+    \Hy@safe@activesfalse
+    % move autoname out of hyperlink
+    % \HyRef@currentHtag
+    #3{%
+      \expandafter\@fifthoffive#1\@empty\@empty\@empty
+    }{%
+      \expandafter\@fourthoffive#1\@empty\@empty\@empty
+    }{%
+      \HyRef@currentHtag
+      % use \@thirdoffive to retrive \@currentlabelname and apply styles
+      \HyRef@autonameref@style{\expandafter\@thirdoffive#1\@empty\@empty\@empty}%
+      \null
+    }%
+  \else
+    \protect\G@refundefinedtrue
+    \nfss@text{\reset@font\bfseries ??}%
+    \@latex@warning{Reference `#2' on page \thepage\space undefined}%
+  \fi
+}
+
+\let\HyRef@autonameref@style\@firstofone
+\makeatother
