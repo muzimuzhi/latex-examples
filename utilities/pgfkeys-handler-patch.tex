@@ -1,0 +1,58 @@
+\RequirePackage{pgfkeys}
+\RequirePackage{xpatch}
+
+\makeatletter
+% usage:
+%   <key>/.patch code={search}{replace}
+% similar to def of /handlers/.add code/.code 2 args={...}
+\pgfkeys{/handlers/.patch/.code 2 args=%
+  % Find out, whether with args or not.
+  \pgfkeysifdefined{\pgfkeyscurrentpath/.@args}%
+  {% Yes, so add to body and reuse args
+    \pgfkeyspatchvalue{\pgfkeyscurrentpath/.@body}{#1}{#2}%
+    % Redefine code
+    {%
+      \pgfkeysgetvalue{\pgfkeyscurrentpath/.@args}{\pgfkeys@tempargs}%
+      \pgfkeysgetvalue{\pgfkeyscurrentpath/.@body}{\pgfkeys@tempbody}%
+      \def\pgfkeys@marshal{\expandafter\gdef\expandafter\pgfkeys@global@temp\pgfkeys@tempargs}%
+      \expandafter\pgfkeys@marshal\expandafter{\pgfkeys@tempbody}%
+    }%
+    \pgfkeysifdefined{\pgfkeyscurrentpath/.@@body}{%
+      % support for \pgfkeysndefargs:
+      \pgfkeyslet{\pgfkeyscurrentpath/.@@body}{\pgfkeys@global@temp}%
+    }{%
+      % support for \pgfkeysdefargs:
+      \pgfkeyslet{\pgfkeyscurrentpath/.@cmd}{\pgfkeys@global@temp}%
+    }%
+  }{% No, so single argument (simple \pgfkeysdef). Redefine accordingly.
+    \edef\pgf@expanded@path{\pgfkeyscurrentpath}%
+    {%
+      \pgfkeysifdefined{\pgf@expanded@path/.@cmd}{%
+        \expandafter\expandafter\expandafter\pgfkeys@temptoks
+        \expandafter\expandafter\expandafter{%
+        \csname pgfk@\pgf@expanded@path/.@body\endcsname}%
+      }{%
+        \expandafter\pgfkeys@temptoks\expandafter{%
+        \expandafter\pgfkeyssetvalue\expandafter{\pgf@expanded@path}{##1}}%
+      }%
+      \edef\pgfkeys@temp{\the\pgfkeys@temptoks}%
+      \pgfkeyspatchvalue\pgfkeys@temp{#1}{#2}%
+      \global\let\pgfkeys@global@temp\pgfkeys@temp
+    }%
+    \def\pgf@temp{\pgfkeyssetvalue{\pgf@expanded@path/.@body}}%
+    \expandafter\pgf@temp\expandafter{\pgfkeys@global@temp}%
+    \expandafter\long\expandafter\def\expandafter\pgfkeys@temp\expandafter##\expandafter1\expandafter\pgfeov\expandafter{\pgfkeys@global@temp}%
+    \pgfkeyslet{\pgf@expanded@path/.@cmd}\pgfkeys@temp
+  }%  
+}
+
+% usage:
+%   \pgfkeyspatchvalue{<key>}{<search>}{<replace>}
+% similar to \pgfkeysaddvalue
+\long\def\pgfkeyspatchvalue#1#2#3{%
+  \pgfkeysifdefined{#1}{%
+    \expandafter\xpatchcmd\csname pgfk@#1\endcsname{#2}{#3}{}
+      {\PackageError{pgfkeys}{Patching for key #1 fails}}%
+  }{}%
+}
+\makeatother

@@ -21,7 +21,7 @@ Typical configured usage
  - modified
    - `\theFancyVerbLine`
 
-## [`utilities/print-definition.tex`](print-definition.tex)
+## [`utilities/print-definition.tex`](utilities/print-definition.tex)
 
 ### User Interface
  - `\printDef{csname}`, print definition of `\cs{csname}`
@@ -33,3 +33,13 @@ Typical configured usage
    - `xcolor` with no package options
  - added
    - `\toString`
+
+## [`utilities/pgfkeys-handler-patch.tex`](utilities/pgfkeys-handler-patch.tex)
+
+### User Interface
+
+ - `\pgfkeys{<key>/.patch={<search>}{<replace>}}`
+ - `\pgfkeyspatchvalue{<key path>}{<search>}{<replace>}`
+
+### Internals
+ - direct dependency: `xpatch`

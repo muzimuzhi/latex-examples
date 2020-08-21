@@ -1,0 +1,35 @@
+\documentclass{article}
+\usepackage{tcolorbox}
+
+\usepackage{array,tabularx}
+\usepackage{colortbl}
+
+\input{../utilities/pgfkeys-handler-patch}
+
+
+\begin{document}
+
+\tcbset{
+  colframe=black!25,
+  colbacktitle=black!75
+}
+
+\begin{tcolorbox}[boxrule=5pt, tabularx*={\arrayrulewidth0.5mm}{X|X|X}, title=Before patching]
+  One     & Two     & Three   \\ \hline\hline
+  1000.00 & 2000.00 & 3000.00 \\ \hline
+  2000.00 & 3000.00 & 4000.00
+\end{tcolorbox}
+
+% patch option "tabularx*", remove "boxrule=0.5mm"
+% from question https://tex.stackexchange.com/q/559367
+\tcbset{
+  tabularx*/.patch={boxrule=0.5mm}{}
+}
+
+\begin{tcolorbox}[boxrule=5pt, tabularx*={\arrayrulewidth0.5mm}{X|X|X}, title=After patching]
+  One     & Two     & Three   \\ \hline\hline
+  1000.00 & 2000.00 & 3000.00 \\ \hline
+  2000.00 & 3000.00 & 4000.00
+\end{tcolorbox}
+
+\end{document}
