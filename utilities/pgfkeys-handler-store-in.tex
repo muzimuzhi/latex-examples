@@ -1,0 +1,47 @@
+% make pgfkeys handler ".store in" compatible with handlers
+%     .get, .add, .prefix, .append
+
+\RequirePackage{pgfkeys}
+
+\makeatletter
+\pgfkeys{
+  /handlers/.store in/.code={%
+    \pgfkeysalso{\pgfkeyscurrentpath/.code=\def#1{##1}}%
+    \pgfkeyssetvalue{\pgfkeyscurrentpath/.@store}{#1}%
+  },
+  /handlers/.estore in/.code={%
+    \pgfkeysalso{\pgfkeyscurrentpath/.code=\edef#1{##1}}%
+    \pgfkeyssetvalue{\pgfkeyscurrentpath/.@store}{#1}%
+  }
+}
+
+\pgfkeys{
+  % compatibility with handler ".get"
+  /handlers/.get/.code={%
+    \pgfkeysifdefined{\pgfkeyscurrentpath/.@store}
+    {%
+      \pgfkeysgetvalue{\pgfkeyscurrentpath/.@store}\pgfkeys@code
+      \expandafter\let\expandafter#1\pgfkeys@code
+    }
+    {\pgfkeysgetvalue{\pgfkeyscurrentpath}{#1}}%
+  },
+  % compatibility with handler ".add", ".prefix", and ".append" are affected
+  /handlers/.add/.code 2 args={%
+    \pgfkeysifdefined{\pgfkeyscurrentpath/.@store}
+    {%
+      \pgfkeysgetvalue{\pgfkeyscurrentpath/.@store}\pgfkeys@code
+      \expandafter\edef\pgfkeys@code{%
+        \unexpanded{#1}%
+        \unexpanded\expandafter\expandafter\expandafter{\pgfkeys@code#2}}%
+    }
+    {\pgfkeysaddvalue{\pgfkeyscurrentpath}{#1}{#2}}%
+  }
+}
+
+\pgfkeys{/handlers/.initial/.code=%
+  \pgfkeyslet{\pgfkeyscurrentpath/.@cmd}\undefined
+  \pgfkeyslet{\pgfkeyscurrentpath/.@args}\undefined
+  \pgfkeyslet{\pgfkeyscurrentpath/.@store}\undefined
+  \pgfkeyssetvalue{\pgfkeyscurrentpath}{#1}%
+}
+\makeatother

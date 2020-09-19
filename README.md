@@ -46,6 +46,16 @@ Typical configured usage
  - direct dependency: `xpatch`
 
 
+## [`utilities/pgfkeys-handler-store-in.tex`](utilities/pgfkeys-handler-store-in.tex)
+
+### User Interface
+ - after `<key>/.store in=<macro>` (or `.estore in`), handlers `.get`, `.add`, `.prefix`, and `.append` will act on `<macro>`, not the key itself
+
+### Internals
+ - `<macro>` is stored in new subkey `.@store`, which will be cleared by `.initial`
+ - for the above four handlers, `.@store` has higher precedence than the key itself (set by `.initial`)
+
+
 ## [`utilities/hyperref-autonameref.tex`](utilities/hyperref-autonameref.tex)
 
 ### User Interface

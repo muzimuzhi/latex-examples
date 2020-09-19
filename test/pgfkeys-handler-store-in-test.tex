@@ -1,0 +1,17 @@
+\documentclass{article}
+\pagestyle{empty}
+
+\input{../utilities/pgfkeys-handler-store-in}
+
+\begin{document}
+\pgfkeys{options/.store in=\savedOptions}
+
+\pgfkeys{options=abc}
+\meaning\savedOptions  % "macro:->abc"
+
+\pgfkeys{options/.add={before }{ after}}
+\meaning\savedOptions  % "macro:->before abc after"
+
+\pgfkeys{options/.get=\xsaved}
+\meaning\xsaved        % "macro:->before abc after"
+\end{document}
