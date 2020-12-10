@@ -1,7 +1,10 @@
 \documentclass{ctexart}
 
-\DeclareSymbolFont{cnmath}{TU}{SongtiSC(0)}{m}{n}
-\DeclareMathSymbol{,}{\mathpunct}{cnmath}{"2C}
+\DeclareSymbolFont{cnmath}{TU}{SongtiSCLight(0)}{m}{n}
+\AtBeginDocument{
+  \DeclareMathSymbol{,}{\mathpunct}{cnmath}{"2C}
+}
+
 
 \input code-with-output
 
@@ -9,8 +12,10 @@
 
 \setcounter{tcb@cnt@example}{2}
 \begin{example}{(Re)declare math symbol}
-  % \DeclareSymbolFont{cnmath}{TU}{SongtiSC(0)}{m}{n}
-  % \DeclareMathSymbol{,}{\mathpunct}{cnmath}{"2C}
+  % \DeclareSymbolFont{cnmath}{TU}{SongtiSCLight(0)}{m}{n}
+  % \AtBeginDocument{
+  %   \DeclareMathSymbol{,}{\mathpunct}{cnmath}{"2C}
+  % }
   
   \LARGE
   text mode: english, comma 中文，逗号\par
