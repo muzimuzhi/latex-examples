@@ -1,7 +1,7 @@
 \RequirePackage{tikz}
 \RequirePackage{etoolbox}
 \makeatletter
-\def\tikzSplitNameWithShape#1,#2\tikz@stop{%
+\def\tikz@splitNameAndShape#1,#2\tikz@stop{%
   \def\tikzNodeName{#1}%
   \def\tikzNodeShape{#2}%
 }
@@ -29,12 +29,12 @@
     },
     execute at end picture={
       \@TikzNodeRecord@false
-      \PackageWarning{tikz}{end: \tikzNodeList}%
+      % \PackageWarning{tikz}{end: \tikzNodeList}%
       \let\tikzNodeList@const=\tikzNodeList
       \foreach \i in \tikzNodeList@const {
         \ifx\i\@empty
         \else
-          \expandafter\tikzSplitNameWithShape\i\tikz@stop
+          \expandafter\tikz@splitNameAndShape\i\tikz@stop
           \ifx\tikzNodeName\@empty\else
             \node also[pin={[every auto mark/.try, every auto \tikzNodeShape\space mark/.try]{\tikzAutoMarkText}}] (\tikzNodeName);
           \fi
@@ -45,11 +45,14 @@
   every auto mark/.style={
     font=\ttfamily,
     rotate=45,
-    red, anchor=west,
+    red,
+    anchor=west,
     pin position=45,
   },
   every auto coordinate mark/.style={
-    blue, anchor=east, pin position=180+45
+    blue,
+    anchor=east,
+    pin position=180+45,
   },
 }
 

@@ -65,3 +65,40 @@ Typical configured usage
 ### Internals
   - direct dependency: `hyperref`
   - `\HyRef@autonameref` and `\HyRef@autonamesetref`
+
+
+## [`utilities/tikz-auto-mark-nodes.tex`](utilities/tikz-auto-mark-nodes.tex)
+
+### User Interface
+ - styles `every auto mark` and `every auto <shape> mark` that accept `pin` options
+ - zero-arg macro `\tikzAutoMarkText` to control the mark text
+ - In the definition of the above styles and macro, `\tikzNodeName` and `\tikzNodeShape` can be used as placeholders of node name and shape, respectively.
+
+### Initial values
+    ```tex
+    \tikzset{
+      every auto mark/.style={
+        font=\ttfamily, rotate=45,
+        red, anchor=west, pin position=45,
+      },
+      every auto coordinate mark/.style={
+        blue, anchor=east, pin position=180+45,
+      },
+    }
+    \newcommand\tikzAutoMarkText{\tikzNodeName}
+    ```
+
+### Internals
+ - Every auto mark is a node pin drawn by 
+    ```tex
+    \node also[pin={[every auto mark/.try, every auto <shape> mark/.try]{\tikzAutoMarkText}}] (\tikzNodeName);
+    ```
+    at the end of every `tikzpicture`.
+    - maybe `scope` is better?
+    - fails with nesting 
+ - direct dependency: `tikz` and `etoolbox` (for `\xappto`)
+ - `tikz` option used: `every picture`, which uses `evecute at begin/end picture`
+ - patched: `\tikz@node@finish` to append node info to `\tikzNodeList`
+ - added:
+    - `\tikzNodeList`, A comma-separated list of elements `{<node_name>, <node_shape>}`
+    - `\newif\if@TikzNodeRecord@`
