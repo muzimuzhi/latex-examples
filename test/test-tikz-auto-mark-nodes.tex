@@ -1,0 +1,82 @@
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{graphs,shapes.misc}
+\tikzset{ampersand replacement=\&,point/.style={coordinate}}
+
+
+\input tikz-auto-mark-nodes
+\makeatletter
+\tikzset{
+  every auto coordinate mark/.append code={%
+    \expandafter\ifodd\expandafter\@gobble\tikzNodeName\else
+      \pgfkeysalso{pin distance=6ex}% distance doubled
+    \fi
+  }
+}
+%\def\pickFirstFour#1#2#3#4#5\stop{#1#2#3#4}
+%\renewcommand\tikzAutoMarkText{\expandafter\pickFirstFour\tikzNodeShape\stop:\tikzNodeName}
+\makeatother
+
+\begin{document}
+% example from pgfmanual's tutorial
+\def\matrixcontent{
+  % First row:
+  \& \& \& \& \& \& \&  \& \& \& \& \node (plus) [terminal] {+};\\
+  % Second row:
+  \node (p1) [point]  {}; \&    \node (ui1)   [nonterminal] {unsigned integer}; \&
+  \node (p2) [point]  {}; \&    \node (dot)   [terminal]    {.};                \&
+  \node (p3) [point]  {}; \&    \node (digit) [terminal]    {digit};            \&
+  \node (p4) [point]  {}; \&    \node (p5)    [point]  {};                      \&
+  \node (p6) [point]  {}; \&    \node (e)     [terminal]    {E};                \&
+  \node (p7) [point]  {}; \&                                                    \&
+  \node (p8) [point]  {}; \&    \node (ui2)   [nonterminal] {unsigned integer}; \&
+  \node (p9) [point]  {}; \&    \node (p10)   [point]       {};\\
+  % Third row:
+  \& \& \& \& \& \& \&  \& \& \& \& \node (minus)[terminal] {-};\\
+}
+
+\tikzset{
+  nonterminal/.style={
+    % The shape:
+    rectangle,
+    % The size:
+    minimum size=6mm,
+    % The border:
+    very thick,
+    draw=red!50!black!50,         % 50% red and 50% black,
+                                  % and that mixed with 50% white
+    % The filling:
+    top color=white,              % a shading that is white at the top...
+    bottom color=red!50!black!20, % and something else at the bottom
+    % Font
+    font=\itshape
+  },
+  terminal/.style={
+    % The shape:
+    rounded rectangle,
+    minimum size=6mm,
+    % The rest
+    very thick,draw=black!50,
+    top color=white,bottom color=black!20,
+    font=\ttfamily},
+  skip loop/.style={to path={-- ++(0,#1) -| (\tikztotarget)}}
+}
+\tikzset{terminal/.append style={text height=1.5ex,text depth=.25ex}}
+\tikzset{nonterminal/.append style={text height=1.5ex,text depth=.25ex}}
+
+\begin{tikzpicture}[skip loop/.style={to path={-- ++(0,#1) -| (\tikztotarget)}},
+                    hv path/.style={to path={-| (\tikztotarget)}},
+                    vh path/.style={to path={|- (\tikztotarget)}}]
+  \matrix[row sep=1mm,column sep=2mm] { \matrixcontent };
+
+  \graph {
+    (p1) -> (ui1) -- (p2) -> (dot) -- (p3) -> (digit) -- (p4)
+         -- (p5)  -- (p6) -> (e) -- (p7) -- (p8) -> (ui2) -- (p9) -> (p10);
+    (p4) ->[skip loop=-5mm]  (p3);
+    (p2) ->[skip loop=5mm]   (p5);
+    (p6) ->[skip loop=-11mm] (p9);
+    (p7) ->[vh path]         (plus)  -> [hv path] (p8);
+    (p7) ->[vh path]         (minus) -> [hv path] (p8);
+  };
+\end{tikzpicture}
+\end{document}
