@@ -4,7 +4,7 @@
 \tikzset{ampersand replacement=\&,point/.style={coordinate}}
 
 
-\input tikz-auto-mark-nodes
+\input ../utilities/tikz-auto-mark-nodes
 \makeatletter
 \tikzset{
   every auto coordinate mark/.append code={%
@@ -66,7 +66,8 @@
 
 \begin{tikzpicture}[skip loop/.style={to path={-- ++(0,#1) -| (\tikztotarget)}},
                     hv path/.style={to path={-| (\tikztotarget)}},
-                    vh path/.style={to path={|- (\tikztotarget)}}]
+                    vh path/.style={to path={|- (\tikztotarget)}},
+                    auto mark]
   \matrix[row sep=1mm,column sep=2mm] { \matrixcontent };
 
   \graph {
@@ -78,5 +79,16 @@
     (p7) ->[vh path]         (plus)  -> [hv path] (p8);
     (p7) ->[vh path]         (minus) -> [hv path] (p8);
   };
+\end{tikzpicture}
+
+\begin{tikzpicture}[auto mark, nodes={draw}]
+  \node[pin={120:pin}] (A) {A};
+  \begin{scope}[no auto mark]
+    \node[right of=A] (B) {B};
+    \begin{scope}[auto mark]
+      \node[below of=B] (B') {B'};
+    \end{scope}
+  \end{scope}
+  \node[right of=B, label={-90:label}] (C) {C};
 \end{tikzpicture}
 \end{document}

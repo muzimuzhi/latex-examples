@@ -70,9 +70,10 @@ Typical configured usage
 ## [`utilities/tikz-auto-mark-nodes.tex`](utilities/tikz-auto-mark-nodes.tex)
 
 ### User Interface
+ - scope options `auto mark` and `no auto mark`
  - styles `every auto mark` and `every auto <shape> mark` that accept `pin` options
- - zero-arg macro `\tikzAutoMarkText` to control the mark text
- - In the definition of the above styles and macro, `\tikzNodeName` and `\tikzNodeShape` can be used as placeholders of node name and shape, respectively.
+ - zero-arg macro `\tikzAutoMarkText` that controls the mark text
+   - In the definition of the above styles and macro, `\tikzNodeName` and `\tikzNodeShape` can be used as placeholders of node name and shape, respectively.
 
 ### Initial values
     ```tex
@@ -94,11 +95,10 @@ Typical configured usage
     \node also[pin={[every auto mark/.try, every auto <shape> mark/.try]{\tikzAutoMarkText}}] (\tikzNodeName);
     ```
     at the end of every `tikzpicture`.
-    - maybe `scope` is better?
-    - fails with nesting 
- - direct dependency: `tikz` and `etoolbox` (for `\xappto`)
- - `tikz` option used: `every picture`, which uses `evecute at begin/end picture`
+    - maybe draw in `execute at end path`?
+ - direct dependency: `tikz` and `etoolbox` (for `\patchcmd`)
+ - `tikz` options used: `execute at begin scope` and `execute at end picture`
  - patched: `\tikz@node@finish` to append node info to `\tikzNodeList`
  - added:
     - `\tikzNodeList`, A comma-separated list of elements `{<node_name>, <node_shape>}`
-    - `\newif\if@TikzNodeRecord@`
+    - `\newif\iftikz@lib@automark@on`

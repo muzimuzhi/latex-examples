@@ -1,47 +1,63 @@
 % similar to https://tex.stackexchange.com/q/327269
 \RequirePackage{tikz}
 \RequirePackage{etoolbox}
+
 \makeatletter
 \def\tikz@splitNameAndShape#1,#2\tikz@stop{%
   \def\tikzNodeName{#1}%
   \def\tikzNodeShape{#2}%
 }
 
-\newif\if@TikzNodeRecord@
+\newif\iftikz@lib@automark@on
+\global\let\tikzNodeList\pgfutil@empty
 
 \patchcmd\tikz@node@finish
   {\endgroup\endgroup}
-  {%
-    \iftikz@node@is@a@label\else
-      \if@TikzNodeRecord@
-        \xappto\tikzNodeList{,{\tikz@last@fig@name,\tikz@shape}}%
-        % \PackageWarning{tikz}{\tikzNodeList}%
-      \fi
-    \fi
-    \endgroup\endgroup
-  }
+  {\tikz@lib@automark@record \endgroup\endgroup}
   {}{\fail}
 
-\tikzset{
-  every picture/.append style={
-    execute at begin picture={%
-      \xdef\tikzNodeList{}%
-      \@TikzNodeRecord@true
-    },
-    execute at end picture={
-      \@TikzNodeRecord@false
-      % \PackageWarning{tikz}{end: \tikzNodeList}%
-      \let\tikzNodeList@const=\tikzNodeList
-      \foreach \i in \tikzNodeList@const {
-        \ifx\i\@empty
-        \else
-          \expandafter\tikz@splitNameAndShape\i\tikz@stop
-          \ifx\tikzNodeName\@empty\else
-            \node also[pin={[every auto mark/.try, every auto \tikzNodeShape\space mark/.try]{\tikzAutoMarkText}}] (\tikzNodeName);
-          \fi
+\def\tikz@lib@automark@record{%
+  \iftikz@lib@automark@on
+    % ignore unnamed nodes
+    \edef\tikz@lib@automark@temp{tikz@f@\the\tikz@fig@count}%
+    \unless\ifx\tikz@lib@automark@temp\tikz@last@fig@name
+      % similar to \xappto from `etoolbox`
+      \xappto\tikzNodeList{%
+        \ifx\tikzNodeList\pgfutil@empty\else,\fi
+        {\tikz@last@fig@name,\tikz@shape}}%
+      % \PackageWarning{tikz}{after app: \tikzNodeList}%
+    \fi
+  \fi
+}
+
+\def\tikz@lib@automark@atbegin@scope{%
+  \tikz@lib@automark@ontrue
+}
+
+\def\tikz@lib@automark@atend@picture{%
+  \tikz@lib@automark@onfalse
+  % \PackageWarning{tikz}{end: \tikzNodeList}%
+  \unless\ifx\tikzNodeList\pgfutil@empty
+    \foreach \i in \tikzNodeList {
+      \unless\ifx\i\@empty
+        \expandafter\tikz@splitNameAndShape\i\tikz@stop
+        \unless\ifx\tikzNodeName\@empty
+          \node also[pin={[every auto mark/.try, every auto \tikzNodeShape\space mark/.try]{\tikzAutoMarkText}}] (\tikzNodeName);
         \fi
-      }
+      \fi
     }
+    \global\let\tikzNodeList\pgfutil@empty
+  \fi
+}
+
+\tikzset{
+  auto mark/.style={
+    execute at begin scope={\tikz@lib@automark@atbegin@scope},
+    % TODO: use `\tikz@after@path` (internal of `execute after path`)
+    execute at end picture={\tikz@lib@automark@atend@picture}
+  },
+  no auto mark/.style={%
+    execute at begin scope={\tikz@lib@automark@onfalse}
   },
   every auto mark/.style={
     font=\ttfamily,
