@@ -1,7 +1,12 @@
+% !TeX TS-program = xelatex
 \documentclass{ctexart}
+\usepackage{endnotes}
 \usepackage{xpatch}
 \usepackage{xunicode-addon}
 
+%
+% common settings
+%
 
 % use specific font inside \textcircled
 % ref: https://stone-zeng.github.io/2019-02-09-circled-numbers
@@ -12,10 +17,13 @@
 \xeCJKDeclareCharClass{Default}{"24EA, "2460->"2473, "3251->"32BF}
 \newfontfamily\EnclosedNumbers{Source Han Serif SC}
 
+
+%
+% specific to footnote
+%
 \makeatletter
 % output counter "footnote" in circled number style
 \renewcommand\thefootnote{\textcircled{\@arabic\c@footnote}}
-
 
 % cancel the superscript style of counter used in footnote text
 \xpatchcmd\@makefntext
@@ -25,19 +33,40 @@
 
 % old: superscript style
 % \def\@makefnmark{\hbox{\@textsuperscript{\normalfont\@thefnmark}}}
-
 % new: normal style, lower baseline
 \def\@makefnmark@nosuperscript{\lower .3ex \hbox{\normalfont\@thefnmark}}
-
 
 % shorten footnote rule
 \xpatchcmd\footnoterule
   {.4\columnwidth}
   {1in}
   {}{\fail}
+
+
+%
+% specific to endnote
+%
+
+% protect \textcircled since \theendnote will be fully-expanded
+\let\textcircled@old\textcircled
+\protected\def\textcircled#1{%
+  \expandafter\textcircled@old\expandafter{\expanded{#1}}}
+
+\renewcommand\theendnote{\textcircled{\@arabic\c@endnote}}
+
+% adjust position of circled number
+\xpatchcmd\enoteformat
+  {\makeenmark}
+  {\makeenmark@nosuperscript}
+  {}{\fail}
+% before
+% \def\@makeenmark{\hbox{\@textsuperscript{\normalfont\@theenmark}}}
+\def\makeenmark@nosuperscript{%
+  \lower .3ex \hbox{\normalfont\@theenmark\space}}
 \makeatother
 
 \begin{document}
+\section{Footnotes}
 一二三\footnote{text}
 
 \addtocounter{footnote}{20}
@@ -45,4 +74,15 @@
 
 \addtocounter{footnote}{20}
 七八九\footnote{text}
+
+\section{Endnotes}
+一二三\endnote{text}
+    
+\addtocounter{endnote}{20}
+四五六\endnote{text}
+
+\addtocounter{endnote}{20}
+七八九\endnote{text}
+
+\theendnotes
 \end{document}
