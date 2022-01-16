@@ -17,6 +17,10 @@
 \xeCJKDeclareCharClass{Default}{"24EA, "2460->"2473, "3251->"32BF}
 \newfontfamily\EnclosedNumbers{Source Han Serif SC}
 
+% for use on overleaf, you can try
+% \AtBeginUTFCommand[\textcircled]{\begingroup\normalsize\EnclosedNumbers}
+% \newfontfamily\EnclosedNumbers{Garamond-Math.otf}
+
 
 %
 % specific to footnotes
@@ -46,13 +50,15 @@
 %
 % specific to endnotes
 %
+\renewcommand\theendnote{\textcircled@protected{\@arabic\c@endnote}}
 
-% protect \textcircled since \theendnote will be fully-expanded
-\let\textcircled@old\textcircled
-\protected\def\textcircled#1{%
-  \expandafter\textcircled@old\expandafter{\expanded{#1}}}
+% a protected variant for use in \theendnote, which will be fully-expanded
+\protected\def\textcircled@protected{\textcircled}
 
-\renewcommand\theendnote{\textcircled{\@arabic\c@endnote}}
+% overleaf doesn't like this approach
+% \let\textcircled@old\textcircled
+% \protected\def\textcircled#1{%
+%  \expandafter\textcircled@old\expandafter{\expanded{#1}}}
 
 % adjust position of circled number
 \xpatchcmd\enoteformat
