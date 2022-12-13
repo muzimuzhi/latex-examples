@@ -1,0 +1,47 @@
+\RequirePackage{xcolor}
+
+\makeatletter
+% Quick \definecolor
+% c.f. last lines of \XC@definec@lor
+%
+% Example: \defineqcolor{mycolor}{rgb}{.5,0,.3}
+%
+% #1 = color name
+% #2 = color model, one of rgb, cmy, cmyk, and gray
+% #3 = color spec, a comma-separated list of numbers in range [0, 1] without extra spaces
+\def\defineqcolor#1#2#3{%
+  \@nameuse{color@#2}\@@drv{#3}%
+  \ifglobalcolors\global\else\xglobal@\fi
+  \expandafter\edef\csname\@backslashchar color@#1\endcsname
+    {\noexpand\xcolor@{}\expandafter{\@@drv}{\detokenize{#2}}{#3}}%
+}
+% optional further optimization
+% \c@lor@arg in \color@<model> checks if its #1 is in range [0, 1]
+% \let\c@lor@arg=\@gobble
+
+% Quick \colorlet
+\def\qcolorlet#1#2{%
+  \ifglobalcolors\global\else\xglobal@\fi
+  \XC@let@cc{\XC@nametocs{#1}}{\XC@nametocs{#2}}%
+}
+
+% Quick \color
+% c.f. \@declaredcolor
+%
+% Example: \qcolor{mycolor}
+%
+% no optional argument, no color expression (even the basic `red!50`),
+% just a mandatory predefined color name
+\def\qcolor#1{\XC@edef\XC@@tmp{#1}\XC@declaredc@lor}
+% optional further optimization
+% use \edef instead of \XC@edef
+% \def\qcolor#1{\XC@edef\XC@@tmp{#1}\XC@declaredc@lor}
+
+% helper
+% #1 = color name
+\ifdefined\XC@nametocs
+  \PackageError{xcolorq}{\string\XC@nametocs already exists}{}
+\else
+  \def\XC@nametocs#1{\@backslashchar color@#1}
+\fi
+\makeatother
