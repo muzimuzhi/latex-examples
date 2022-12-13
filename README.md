@@ -28,18 +28,15 @@ Internals
    - `\theFancyVerbLine`
 
 
-### [`print-definition.tex`](utilities/print-definition.tex)
+### [`hyperref-autonameref.tex`](utilities/hyperref-autonameref.tex)
 
 User Interface
- - `\printDef{csname}`, print definition of `\cs{csname}`
- - `\printAndRunCode{code}`
+  - `\autonameref{<label key>}` and `\autonameref*{<label key>}`
+  - 1-arg `\HyRef@autonameref@style` which controls the extra output style (see [test file](test/hyperref-autonameref-test.tex))
 
 Internals
- - direct dependencies:
-   - `fvextra`
-   - `xcolor` with no package options
- - added
-   - `\toString`
+  - direct dependency: `hyperref`
+  - `\HyRef@autonameref` and `\HyRef@autonamesetref`
 
 
 ### [`pgfkeys-handler-patch.tex`](utilities/pgfkeys-handler-patch.tex)
@@ -62,15 +59,18 @@ Internals
  - for the above four handlers, `.@store` has higher precedence than the key itself (set by `.initial`)
 
 
-### [`hyperref-autonameref.tex`](utilities/hyperref-autonameref.tex)
+### [`print-definition.tex`](utilities/print-definition.tex)
 
 User Interface
-  - `\autonameref{<label key>}` and `\autonameref*{<label key>}`
-  - 1-arg `\HyRef@autonameref@style` which controls the extra output style (see [test file](test/hyperref-autonameref-test.tex))
+ - `\printDef{csname}`, print definition of `\cs{csname}`
+ - `\printAndRunCode{code}`
 
 Internals
-  - direct dependency: `hyperref`
-  - `\HyRef@autonameref` and `\HyRef@autonamesetref`
+ - direct dependencies:
+   - `fvextra`
+   - `xcolor` with no package options
+ - added
+   - `\toString`
 
 
 ### [`tikz-auto-mark-nodes.tex`](utilities/tikz-auto-mark-nodes.tex)
