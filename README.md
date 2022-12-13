@@ -4,9 +4,11 @@
     Rewrote whole Git history to track all PDF files with Git LFS.\
     (by executing `git lfs migrate import --include="*.pdf" --everything).
 
-## [`utilities/code-with-output.tex`](utilities/code-with-output.tex)
+## Utilities
 
-### User Interface
+### [`code-with-output.tex`](utilities/code-with-output.tex)
+
+User Interface
  - `\begin{example}[tcb options]{title}`, code followed by output, numbered 
  - `\begin{example*}[tcb options]{title}`, unnumbered variant
 
@@ -14,7 +16,7 @@ Typical configured usage
  - side by side, `\begin{example}[sidebyside]{title}`
  - change code language, `\begin{example}[minted options app={language=python}]{title}`
 
-### Internals
+Internals
  - direct dependencies: 
    - `tcolorbox`, with libraries `hooks`, `minted`, `skins` and `xparse` loaded
    - `accsupp`
@@ -26,13 +28,13 @@ Typical configured usage
    - `\theFancyVerbLine`
 
 
-## [`utilities/print-definition.tex`](utilities/print-definition.tex)
+### [`print-definition.tex`](utilities/print-definition.tex)
 
-### User Interface
+User Interface
  - `\printDef{csname}`, print definition of `\cs{csname}`
  - `\printAndRunCode{code}`
 
-### Internals
+Internals
  - direct dependencies:
    - `fvextra`
    - `xcolor` with no package options
@@ -40,46 +42,46 @@ Typical configured usage
    - `\toString`
 
 
-## [`utilities/pgfkeys-handler-patch.tex`](utilities/pgfkeys-handler-patch.tex)
+### [`pgfkeys-handler-patch.tex`](utilities/pgfkeys-handler-patch.tex)
 
-### User Interface
+User Interface
  - `\pgfkeys{<key>/.patch={<search>}{<replace>}}`
  - `\pgfkeyspatchvalue{<key path>}{<search>}{<replace>}`
 
-### Internals
+Internals
  - direct dependency: `xpatch`
 
 
-## [`utilities/pgfkeys-handler-store-in.tex`](utilities/pgfkeys-handler-store-in.tex)
+### [`pgfkeys-handler-store-in.tex`](utilities/pgfkeys-handler-store-in.tex)
 
-### User Interface
+User Interface
  - after `<key>/.store in=<macro>` (or `.estore in`), handlers `.get`, `.add`, `.prefix`, and `.append` will act on `<macro>`, not the key itself
 
-### Internals
+Internals
  - `<macro>` is stored in new subkey `.@store`, which will be cleared by `.initial`
  - for the above four handlers, `.@store` has higher precedence than the key itself (set by `.initial`)
 
 
-## [`utilities/hyperref-autonameref.tex`](utilities/hyperref-autonameref.tex)
+### [`hyperref-autonameref.tex`](utilities/hyperref-autonameref.tex)
 
-### User Interface
+User Interface
   - `\autonameref{<label key>}` and `\autonameref*{<label key>}`
   - 1-arg `\HyRef@autonameref@style` which controls the extra output style (see [test file](test/hyperref-autonameref-test.tex))
 
-### Internals
+Internals
   - direct dependency: `hyperref`
   - `\HyRef@autonameref` and `\HyRef@autonamesetref`
 
 
-## [`utilities/tikz-auto-mark-nodes.tex`](utilities/tikz-auto-mark-nodes.tex)
+### [`tikz-auto-mark-nodes.tex`](utilities/tikz-auto-mark-nodes.tex)
 
-### User Interface
+User Interface
  - scope options `auto mark` and `no auto mark`
  - styles `every auto mark` and `every auto <shape> mark` that accept `pin` options
  - zero-arg macro `\tikzAutoMarkText` that controls the mark text
    - In the definition of the above styles and macro, `\tikzNodeName` and `\tikzNodeShape` can be used as placeholders of node name and shape, respectively.
 
-### Initial values
+Initial values
     ```tex
     \tikzset{
       every auto mark/.style={
@@ -93,7 +95,7 @@ Typical configured usage
     \newcommand\tikzAutoMarkText{\tikzNodeName}
     ```
 
-### Internals
+Internals
  - Every auto mark is a node pin drawn by 
     ```tex
     \node also[pin={[every auto mark/.try, every auto <shape> mark/.try]{\tikzAutoMarkText}}] (\tikzNodeName);
