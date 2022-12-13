@@ -76,19 +76,19 @@
   \qcolorlet{tempc2}{mycmyk1}%
 }
 
-% \(q)color benchmarks
-\BenchmarkWithoutSideEffects{\color}{%
+% \(q)color{<name>} benchmarks
+\BenchmarkWithoutSideEffects{\color{name} }{%
   \setbox0=\hbox{%
-    text {\color{mygray1}{gray}} text
-    {\color{myrgb1}{rgb}} text
-    {\color{mycmyk1}{cmyk}} text}%
+    text {\color{mygray1} gray} text
+    {\color{myrgb1} rgb} text
+    {\color{mycmyk1} cmyk} text}%
 }
 
-\BenchmarkWithoutSideEffects{\qcolor}{%
+\BenchmarkWithoutSideEffects{\qcolor{name} }{%
   \setbox0=\hbox{%
-    text {\qcolor{mygray1}{gray}} text
-    {\qcolor{myrgb1}{rgb}} text
-    {\qcolor{mycmyk1}{cmyk}} text}%
+    text {\qcolor{mygray1} gray} text
+    {\qcolor{myrgb1} rgb} text
+    {\qcolor{mycmyk1} cmyk} text}%
 }
 
 \begingroup
@@ -97,7 +97,7 @@
 \def\qcolor#1{\edef\XC@@tmp{#1}\XC@declaredc@lor}
 \makeatother
 
-\BenchmarkWithoutSideEffects{furthur \qcolor}{%
+\BenchmarkWithoutSideEffects{furthur \qcolor{name} }{%
   \setbox0=\hbox{%
     text {\qcolor{mygray1}{gray}} text
     {\qcolor{myrgb1}{rgb}} text
@@ -105,4 +105,20 @@
 }
 \box0\par
 \endgroup
+
+% \(q)color[<model>]{<spec>} benchmarks
+\BenchmarkWithoutSideEffects{\color[model]{spec} }{%
+  \setbox0=\hbox{%
+    text {\color[gray]{0.35} gray} text
+    {\color[rgb]{0.5,0,0.3} rgb} text
+    {\color[cmyk]{0.5,0,0.3,0.1} cmyk} text}%
+}
+
+\BenchmarkWithoutSideEffects{\qcolor[model]{spec} }{%
+  \setbox0=\hbox{%
+    text {\qcolor[gray]{0.35} gray} text
+    {\qcolor[rgb]{0.5,0,0.3} rgb} text
+    {\qcolor[cmyk]{0.5,0,0.3,0.1} cmyk} text}%
+}
+\box0\par
 \end{document}

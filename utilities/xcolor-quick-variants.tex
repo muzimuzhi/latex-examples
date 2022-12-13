@@ -4,12 +4,13 @@
 % Quick \definecolor
 % c.f. last lines of \XC@definec@lor
 %
-% Example: \defineqcolor{mycolor}{rgb}{.5,0,.3}
+% Example:
+%   \defineqcolor{mycolor}{rgb}{0.5,0,0.3}
 %
 % #1 = color name
 % #2 = color model, one of rgb, cmy, cmyk, and gray
 % #3 = color spec, a comma-separated list of numbers in range [0, 1] without extra spaces
-\def\defineqcolor#1#2#3{%
+\protected\def\defineqcolor#1#2#3{%
   \@nameuse{color@#2}\@@drv{#3}%
   \ifglobalcolors\global\else\xglobal@\fi
   \expandafter\edef\csname\@backslashchar color@#1\endcsname
@@ -20,7 +21,7 @@
 % \let\c@lor@arg=\@gobble
 
 % Quick \colorlet
-\def\qcolorlet#1#2{%
+\protected\def\qcolorlet#1#2{%
   \ifglobalcolors\global\else\xglobal@\fi
   \XC@let@cc{\XC@nametocs{#1}}{\XC@nametocs{#2}}%
 }
@@ -28,14 +29,24 @@
 % Quick \color
 % c.f. \@declaredcolor
 %
-% Example: \qcolor{mycolor}
+% Example:
+%   \qcolor{mycolor}
+%   \qcolor[rgb]{.5,0,.3}
 %
-% no optional argument, no color expression (even the basic `red!50`),
-% just a mandatory predefined color name
-\def\qcolor#1{\XC@edef\XC@@tmp{#1}\XC@declaredc@lor}
+\protected\def\qcolor{\@ifnextchar[{\@undeclaredqcolor}{\@declaredqcolor}}
+
+\protected\def\@undeclaredqcolor[#1]#2{%
+  \@nameuse{color@#1}\current@color{#2}%
+  \edef\XC@current@color{\noexpand\xcolor@{}{\current@color}{#1}{#2}}%
+  \XC@display
+}
+
+\protected\def\@declaredqcolor#1{%
+  \XC@edef\XC@@tmp{#1}\XC@declaredc@lor
+}
 % optional further optimization
 % use \edef instead of \XC@edef
-% \def\qcolor#1{\XC@edef\XC@@tmp{#1}\XC@declaredc@lor}
+% \protected\def\@declaredqcolor#1{\edef\XC@@tmp{#1}\XC@declaredc@lor}
 
 % helper
 % #1 = color name
