@@ -108,3 +108,15 @@ Internals
  - added:
     - `\tikzNodeList`, A comma-separated list of elements `{<node_name>, <node_shape>}`
     - `\newif\iftikz@lib@automark@on`
+
+
+### [`xcolor-quick-variants.tex`](utilities/xcolor-quick-variants.tex)
+
+User Interface
+ - `\defineqcolor{<name>}{<model>}{<spec>}`
+ - `\colorqlet{<name1>}{<name2>}`
+ - `\qcolor{<name>}` or `\qcolor[<model>]{<spec>}`
+   - `<model> ::= gray | rgb | cmyk`
+
+Internal
+ - `\XC@nametocs{<color name>}`
