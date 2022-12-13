@@ -1,0 +1,108 @@
+\documentclass{article}
+\usepackage{xcolor}
+\usepackage{fancyvrb, l3benchmark}
+
+%\usepackage{unravel}
+%\unravelsetup{max-action=1000, max-input=1000, max-output=1000}
+%\long\def\beginunravel#1\endunravel{\unravel{#1}}
+%\providecommand\beginunravel{}
+%\def\endunravel{}
+
+\input xcolor-quick-variants
+
+\ExplSyntaxOn
+\cs_new_protected:Npn \BenchmarkWithSideEffects #1#2
+  {
+    \leavevmode\llap{\ttfamily\detokenize{#1}}
+    \benchmark_tic: #2 \benchmark_toc:
+    \__benchmark_fp_to_tl:N \g_benchmark_time_fp \space seconds \par
+  }
+
+\cs_new_protected:Npn \BenchmarkWithoutSideEffects #1#2
+  {
+    \leavevmode\llap{\ttfamily\detokenize{#1}}
+    \benchmark:n {#2}
+    \__benchmark_fp_to_tl:N \g_benchmark_time_fp \space seconds,~
+    \fp_to_int:N \g_benchmark_ops_fp \space operations \par
+  }
+
+\cs_new:Nn \xcolor_nametocs:n { \c_backslash_str color@ #1 }
+
+\cs_new:Npn \IfColorEqualTF #1#2#3#4
+  {
+    \tl_if_eq:ccTF
+      {\xcolor_nametocs:n{#1}} {\xcolor_nametocs:n{#2}}
+      {#3} {#4}
+  }
+\ExplSyntaxOff
+
+\begin{document}
+\parindent=0pt
+% \define(q)color benchmarks
+\BenchmarkWithoutSideEffects{\definecolor}{%
+  \definecolor {mygray1}{gray}{0.35}%
+  \definecolor {myrgb1} {rgb} {0.5,0,0.3}%
+  \definecolor {mycmyk1}{cmyk}{0.5,0,0.3,0.1}}
+
+\BenchmarkWithoutSideEffects{\defineqcolor}{%
+  \defineqcolor{mygray2}{gray}{0.35}%
+  \defineqcolor{myrgb2} {rgb} {0.5,0,0.3}%
+  \defineqcolor{mycmyk2}{cmyk}{0.5,0,0.3,0.1}}
+
+\begingroup
+\makeatletter
+\let\c@lor@arg=\@gobble
+\makeatother
+\BenchmarkWithoutSideEffects{furthur \defineqcolor}{%
+  \defineqcolor{mygray3}{gray}{0.35}%
+  \defineqcolor{myrgb3} {rgb} {0.5,0,0.3}%
+  \defineqcolor{mycmyk3}{cmyk}{0.5,0,0.3,0.1}}
+\endgroup
+
+% test equivalence
+\IfColorEqualTF {mygray1}{mygray2}{} {\FALSE}
+\IfColorEqualTF {myrgb1} {myrgb2} {} {\FALSE}
+\IfColorEqualTF {mycmyk1}{mycmyk2}{} {\FALSE}
+
+% \(q)colorlet benchmarks
+\BenchmarkWithoutSideEffects{\colorlet}{%
+  \colorlet {tempa}{mygray1}%
+  \colorlet {tempb}{myrgb1}%
+  \colorlet {tempc}{mycmyk1}}
+
+\BenchmarkWithoutSideEffects{\qcolorlet}{%
+  \qcolorlet{tempa2}{mygray1}%
+  \qcolorlet{tempb2}{myrgb1}%
+  \qcolorlet{tempc2}{mycmyk1}%
+}
+
+% \(q)color benchmarks
+\BenchmarkWithoutSideEffects{\color}{%
+  \setbox0=\hbox{%
+    text {\color{mygray1}{gray}} text
+    {\color{myrgb1}{rgb}} text
+    {\color{mycmyk1}{cmyk}} text}%
+}
+
+\BenchmarkWithoutSideEffects{\qcolor}{%
+  \setbox0=\hbox{%
+    text {\qcolor{mygray1}{gray}} text
+    {\qcolor{myrgb1}{rgb}} text
+    {\qcolor{mycmyk1}{cmyk}} text}%
+}
+
+\begingroup
+\makeatletter
+% s/\XC@edef/\edef/
+\def\qcolor#1{\edef\XC@@tmp{#1}\XC@declaredc@lor}
+\makeatother
+
+\BenchmarkWithoutSideEffects{furthur \qcolor}{%
+  \setbox0=\hbox{%
+    text {\qcolor{mygray1}{gray}} text
+    {\qcolor{myrgb1}{rgb}} text
+    {\qcolor{mycmyk1}{cmyk}} text}%
+}
+\box0\par
+\endgroup
+\end{document}
