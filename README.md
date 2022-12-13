@@ -1,5 +1,9 @@
 # LaTeX examples
 
+- Dec 13, 2022
+    Rewrote whole Git history to track all PDF files with Git LFS.\
+    (by executing `git lfs migrate import --include="*.pdf" --everything).
+
 ## [`utilities/code-with-output.tex`](utilities/code-with-output.tex)
 
 ### User Interface
