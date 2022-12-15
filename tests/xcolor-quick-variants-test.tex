@@ -13,6 +13,7 @@
 \ExplSyntaxOn
 \cs_new_protected:Npn \BenchmarkWithSideEffects #1#2
   {
+%    \tl_log:e {\detokenize{#1}} % latex3 alias is \tl_to_str:n
     \leavevmode\llap{\ttfamily\detokenize{#1}}
     \benchmark_tic: #2 \benchmark_toc:
     \__benchmark_fp_to_tl:N \g_benchmark_time_fp \space seconds \par
@@ -21,10 +22,13 @@
 \cs_new_protected:Npn \BenchmarkWithoutSideEffects #1#2
   {
     \leavevmode\llap{\ttfamily\detokenize{#1}}
+%    \tl_log:e {\detokenize{#1}}
     \benchmark:n {#2}
     \__benchmark_fp_to_tl:N \g_benchmark_time_fp \space seconds,~
     \fp_to_int:N \g_benchmark_ops_fp \space operations \par
   }
+
+%\cs_generate_variant:Nn \tl_log:n {e}
 
 \cs_new:Nn \xcolor_nametocs:n { \c_backslash_str color@ #1 }
 
@@ -58,6 +62,7 @@
   \defineqcolor{myrgb3} {rgb} {0.5,0,0.3}%
   \defineqcolor{mycmyk3}{cmyk}{0.5,0,0.3,0.1}}
 \endgroup
+\bigskip
 
 % test equivalence
 \IfColorEqualTF {mygray1}{mygray2}{} {\FALSE}
@@ -75,6 +80,7 @@
   \qcolorlet{tempb2}{myrgb1}%
   \qcolorlet{tempc2}{mycmyk1}%
 }
+\bigskip
 
 % \(q)color{<name>} benchmarks
 \BenchmarkWithoutSideEffects{\color{name} }{%
@@ -105,6 +111,7 @@
 }
 \box0\par
 \endgroup
+\bigskip
 
 % \(q)color[<model>]{<spec>} benchmarks
 \BenchmarkWithoutSideEffects{\color[model]{spec} }{%
