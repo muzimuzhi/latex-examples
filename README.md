@@ -2,7 +2,7 @@
 
 - Dec 13, 2022
     Rewrote whole Git history to track all PDF files with Git LFS.\
-    (by executing `git lfs migrate import --include="*.pdf" --everything).
+    (by executing `git lfs migrate import --include="*.pdf" --everything`).
 
 ## Utilities
 
