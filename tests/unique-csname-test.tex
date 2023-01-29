@@ -8,7 +8,12 @@
     \expandafter
   \endgroup
   \expandafter\testuniqueness\expandafter{\csname\myunique\endcsname}\par
+  % test \undefine\cmd
   \undefine\myunique
+  \testuniqueness{\myunique}
+  % test \undefinecs{<csname>}
+  \def\muunique{}
+  \undefinecs{myunique}
   \testuniqueness{\myunique}
 }
 \def\testuniqueness#1{\string#1=\meaning#1%

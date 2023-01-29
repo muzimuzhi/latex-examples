@@ -30,7 +30,11 @@
 
 % start with empty csname (\csname\endcsname IS a valid cs)
 \def\uniquecsname{\@uniquecsname@try{}}
+
 \long\def\undefine#1{% short form \undef is taken by etoolbox.sty
   \begingroup\expandafter\endgroup
   \expandafter\let\expandafter#1\csname\uniquecsname\endcsname}
+
+\long\def\undefinecs#1{%
+  \expandafter\undefine\csname #1\endcsname}
 \makeatother

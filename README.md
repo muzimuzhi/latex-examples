@@ -112,8 +112,8 @@ Internals
 ### [`unique-csname`](utilities/unique-csname.tex)
 
 User Interface
- - `\undefine<cs>` un-defines a control sequence locally
- - `\uniquecsname` expands to a `<csname>` which tests false by `\ifcsname`
+ - `\undefine<cs>` and `\undefinecs{<csname>}` un-define a control sequence locally
+ - `\uniquecsname` expands to a `<csname>` which tests false in `\ifcsname`
 
 Internals
  - `\@uniquecsname@try` and `\@uniquecsname@generate`
