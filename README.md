@@ -55,7 +55,7 @@ User Interface
  - after `<key>/.store in=<macro>` (or `.estore in`), handlers `.get`, `.add`, `.prefix`, and `.append` will act on `<macro>`, not the key itself
 
 Internals
- - `<macro>` is stored in new subkey `.@store`, which will be cleared by `.initial`
+ - `<macro>` is stored in new sub-key `.@store`, which will be cleared by `.initial`
  - for the above four handlers, `.@store` has higher precedence than the key itself (set by `.initial`)
 
 
@@ -109,6 +109,14 @@ Internals
     - `\tikzNodeList`, A comma-separated list of elements `{<node_name>, <node_shape>}`
     - `\newif\iftikz@lib@automark@on`
 
+### [`unique-csname`](utilities/unique-csname.tex)
+
+User Interface
+ - `\undefine<cs>` un-defines a control sequence locally
+ - `\uniquecsname` expands to a `<csname>` which tests false by `\ifcsname`
+
+Internals
+ - `\@uniquecsname@try` and `\@uniquecsname@generate`
 
 ### [`xcolor-quick-variants.tex`](utilities/xcolor-quick-variants.tex)
 

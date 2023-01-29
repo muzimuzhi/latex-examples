@@ -1,0 +1,36 @@
+\makeatletter
+
+% combination of Henri Menke and Skillmon's answers to
+%   https://tex.stackexchange.com/q/633706
+
+\long\def\@uniquecsname@try#1{%
+  \ifcsname #1\endcsname
+    \expandafter\@firstoftwo
+  \else
+    \expandafter\@secondoftwo
+  \fi
+  % expand \@uniquecsname@generate trice
+  {\expandafter\expandafter\expandafter\@uniquecsname@try
+   \expandafter\expandafter\expandafter{\@uniquecsname@generate{#1}}}
+  {#1}%
+}
+
+% if no random int primitive is provided, use the null char trick
+\begingroup
+\catcode`\^^@=12 % default catcode is 15 (invalid character)
+\unexpanded{\endgroup % tokenize ^^@ with catcode 12
+  \ifdefined\pdfuniformdeviate
+    \def\@uniquecsname@generate#1{\number\pdfuniformdeviate\maxdimen}
+  \else\ifdefined\uniformdeviate
+    \def\@uniquecsname@generate#1{\number\uniformdeviate\maxdimen}
+  \else
+    \edef\@uniquecsname@generate#1{#1^^@}% the 0x00 null char
+  \fi\fi
+}
+
+% start with empty csname (\csname\endcsname IS a valid cs)
+\def\uniquecsname{\@uniquecsname@try{}}
+\long\def\undefine#1{% short form \undef is taken by etoolbox.sty
+  \begingroup\expandafter\endgroup
+  \expandafter\let\expandafter#1\csname\uniquecsname\endcsname}
+\makeatother

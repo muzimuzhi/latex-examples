@@ -1,0 +1,45 @@
+\documentclass{article}
+\input{../utilities/unique-csname}
+
+\begin{document}
+\def\OneTest{%
+  \edef\myunique{\uniquecsname}
+  \begingroup
+    \expandafter
+  \endgroup
+  \expandafter\testuniqueness\expandafter{\csname\myunique\endcsname}\par
+  \undefine\myunique
+  \testuniqueness{\myunique}
+}
+\def\testuniqueness#1{\string#1=\meaning#1%
+  \ifdefined#1\errmessage{\string#1 defined}\fi}
+\ttfamily
+
+% test 1, empty csname
+\OneTest
+
+% test 2, use random in as csname
+% prep: define empty esname
+\csname\endcsname
+\OneTest
+
+% test 3, copies of ^^@ as csname
+% prep 1: reload with no \(pdf)uniformdeviate assumption
+\begingroup
+  \expandafter
+\endgroup
+\expandafter\let\expandafter\pdfuniformdeviate\csname\uniquecsname\expandafter\endcsname
+\expandafter\let\expandafter   \uniformdeviate\csname\uniquecsname\endcsname
+
+\input{../utilities/unique-csname}
+
+% prep 2: define first two csnames, ^^@ and ^^@^^@
+\begingroup
+\catcode`\^^@=12
+\unexpanded{\endgroup
+  \csname^^@\endcsname
+  \csname^^@^^@\endcsname
+}
+
+\OneTest
+\end{document}
