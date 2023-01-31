@@ -31,6 +31,10 @@
 % start with empty csname (\csname\endcsname IS a valid cs)
 \def\uniquecsname{\@uniquecsname@try{}}
 
+% Q: Why no \uniquecmd that expands to an always-undefined control sequence?
+% A: It's impossible since both \begingroup and \endgroup are unexpandable.
+%    \undefine and \undefinecs will cover all the unexpandable use cases.
+
 \long\def\undefine#1{% short form \undef is taken by etoolbox.sty
   \begingroup\expandafter\endgroup
   \expandafter\let\expandafter#1\csname\uniquecsname\endcsname}
