@@ -3,84 +3,143 @@
 \usepgfkeyslibrary{conditionals}
 
 \makeatletter
+\newcount\c@tests@total
 \newcount\c@tests@passed
 \newcount\c@tests@failed
 
 \ifdefined\PackageError
-  \def\tests@error#1{\errmessage{Package tests Error: #1}}%
-\else
   \def\tests@error#1{\PackageError{tests}{#1}{}}%
+\else
+  \def\tests@error#1{\errmessage{Package tests Error: #1}}%
 \fi
 
 \def\tests@text@true{true}
 \def\tests@text@false{false}
 
-\def\AssertTrueResult{%
-  \ifx\pgfkeysresult\tests@text@true
+\def\AssertResultTrue{%
+  \global\advance\c@tests@total by 1\relax
+  \ifx\assertresult\tests@text@true
     \global\advance\c@tests@passed by 1\relax
   \else
     \global\advance\c@tests@failed by 1\relax
     \tests@error{%
+      Test \the\c@tests@total\space of ``\tests@name'' failed.\MessageBreak
       expected: \detokenize\expandafter{\tests@text@true},
-      actual: \detokenize\expandafter{\pgfkeysresult}}%
+      actual: \detokenize\expandafter{\assertresult}}%
   \fi}
-\def\AssertFalseResult{%
-  \ifx\pgfkeysresult\tests@text@false
+\def\AssertResultFalse{%
+  \global\advance\c@tests@total by 1\relax
+  \ifx\assertresult\tests@text@false
     \global\advance\c@tests@passed by 1\relax
   \else
     \global\advance\c@tests@failed by 1\relax
     \tests@error{%
       expected: \detokenize\expandafter{\tests@text@false},
-      actual: \detokenize\expandafter{\pgfkeysresult}}%
+      actual: \detokenize\expandafter{\assertresult}}%
   \fi}
 
 \def\StatAsserts{%
-  Passed \the\c@tests@passed, failed \the\c@tests@failed.\par
+  \ifnum\c@tests@failed=0\relax
+    All passed (\the\c@tests@passed\space test\ifnum\c@tests@passed>1s\fi).
+  \else
+    \ifnum\c@tests@passed=0\relax
+      No tests.
+    \else
+      Passed \the\c@tests@passed, failed \the\c@tests@failed.
+    \fi
+  \fi
+  \par
+  \global\c@tests@total=0\relax
   \global\c@tests@passed=0\relax
   \global\c@tests@failed=0\relax
 }
 
 \long\def\BeginUnitTests#1{%
-  Test ``\texttt{\detokenize{#1}}''\par%
+  \begingroup
+  \edef\tests@name{\detokenize{#1}}%
+  \ifcsname tests\tests@name@prefix\tests@name\endcsname
+    \tests@error{Test group name ``\tests@name'' already exists.}%
+  \else
+    \global\expandafter\let\csname tests\tests@name@prefix\tests@name\endcsname=\relax
+  \fi
+  Test ``\texttt{\tests@name}''\par%
 }
-\long\def\EndUnitTests{\StatAsserts\par\bigskip}
+\long\def\EndUnitTests{%
+  \StatAsserts\endgroup\par\bigskip}
+
+\begingroup
+  \catcode`\^^@=12 % 0x00 null char with default catcode 15 (invalid character)
+  \gdef\tests@name@prefix{^^@}
+\endgroup
 \makeatother
 
 \begin{document}
 \parindent=0pt
 \pgfkeys{
-  /t/.code=\def\pgfkeysresult{true},
-  /f/.code=\def\pgfkeysresult{false},
-  /utils/t/.code=\def\pgfkeysresult{true},
-  /utils/f/.code=\def\pgfkeysresult{false}
+  /t/.code=\def\assertresult{true},
+  /f/.code=\def\assertresult{false},
+  /utils/t/.code=\def\assertresult{true},
+  /utils/f/.code=\def\assertresult{false}
 }
 
-\BeginUnitTests{/utils/if nTF}
-  % undefined
-  \pgfkeys{/utils/if nTF={abc}{t}{f}} \AssertFalseResult
+\BeginUnitTests{/utils/ifname nTF}
+  % undefined \if<name>
+  \pgfkeys{/utils/ifname nTF={abc}{t}{f}} \AssertResultFalse
   % primitive
-  \pgfkeys{/utils/if nTF={mmode}{t}{f}} \AssertFalseResult
-  % user-defined
+  \pgfkeys{/utils/ifname nTF={mmode}{t}{f}} \AssertResultFalse
+  % defined by \newif
   \csname @tempswafalse\endcsname
-  \pgfkeys{/utils/if nTF={@tempswa}{t}{f}} \AssertFalseResult
+  \pgfkeys{/utils/ifname nTF={@tempswa}{t}{f}} \AssertResultFalse
   \csname @tempswatrue\endcsname
-  \pgfkeys{/utils/if nTF={@tempswa}{t}{f}} \AssertTrueResult
+  \pgfkeys{/utils/ifname nTF={@tempswa}{t}{f}} \AssertResultTrue
 \EndUnitTests
 
-\BeginUnitTests{/utils/ifnum nnTF}
+\BeginUnitTests{/utils/ifnum nNnTF}
   \pgfkeys{/utils/.cd,
-    ifnum nnTF={3}{=}{1+2}tf, exec=\AssertTrueResult,
-    ifnum nnTF={2*5}>{7/3}tf, exec=\AssertTrueResult
+    ifnum nNnTF={-3-3}<{-3}tf, exec=\AssertResultTrue,
+    ifnum nNnTF={3}{=}{1+2}tf, exec=\AssertResultTrue,
+    ifnum nNnTF={2*5}>{7/3}tf, exec=\AssertResultTrue
+  }
+\EndUnitTests
+
+\BeginUnitTests{/utils/ifdim nNnTF}
+  \pgfkeys{/utils/.cd,
+    ifdim nNnTF={-3pt}<{3pt}tf, exec=\AssertResultTrue,
+    ifdim nNnTF={5pt*2}{=}{3pt*3}tf, exec=\AssertResultFalse,
+    ifdim nNnTF={10pt/2}>{10pt-1pt}tf, exec=\AssertResultFalse
+  }
+\EndUnitTests
+
+\BeginUnitTests{/utils/if NNTF}
+  \pgfkeys{/utils/.cd,
+    if NNTF={$}{$}tf, exec=\AssertResultTrue,
+    if NNTF={_}{^}tf, exec=\AssertResultFalse
+  }
+\EndUnitTests
+
+\BeginUnitTests{/utils/ifcat NNTF}
+  \pgfkeys{/utils/.cd,
+    ifcat NNTF={$}{$}tf, exec=\AssertResultTrue,
+    ifcat NNTF={_}{^}tf, exec=\AssertResultFalse
   }
 \EndUnitTests
 
 \BeginUnitTests{/utils/ifx NNTF}
   \pgfkeys{/utils/.cd,
-    ifx NNTF={a}{a}tf, exec=\AssertTrueResult,
-    ifx NNTF={a}{b}tf, exec=\AssertFalseResult,
+    ifx NNTF={a}{a}tf, exec=\AssertResultTrue,
+    ifx NNTF={a}{b}tf, exec=\AssertResultFalse,
     ifx NNTF/.expanded={\relax}{\expandafter\noexpand\csname\endcsname}tf,
-    exec=\AssertTrueResult,
-    ifx NNTF=\undefined\label tf, exec=\AssertFalseResult
+    exec=\AssertResultTrue,
+    ifx NNTF=\undefined\label tf, exec=\AssertResultFalse
+  }
+\EndUnitTests
+
+\BeginUnitTests{/utils/if strcmp nNnTF}
+  \pgfkeys{/utils/.cd,
+    if strcmp nNnTF={a}{=}{a}tf, exec=\AssertResultTrue,
+    if strcmp nNnTF={a}{<}{b}tf, exec=\AssertResultTrue,
+    if strcmp nNnTF={a}{>}{z}tf, exec=\AssertResultFalse,
+    if strcmp nNnTF={\abc}{<}{\def}tf, exec=\AssertResultTrue
   }
 \EndUnitTests
 

@@ -1,5 +1,5 @@
 \pgfkeys{
-  /utils/if nTF/.code n args={3}{%
+  /utils/ifname nTF/.code n args={3}{%
     \ifcsname if#1\endcsname
       \pgfkeys@lib@cond@gobble\if % paired \ifxxx ... (\else ...) \fi to cheat TeX
       \csname if#1\endcsname
@@ -8,13 +8,14 @@
         \expandafter\expandafter\expandafter\@secondoftwo
       \fi
     \else
-      \pgfkeys@error{``\pgfkeyscurrentkey=\detokenize{{#1}{#2}{#3}}'' uses undefined conditional \pgfkeys@lib@cond@backslashchar if#1.\pgfkeys@lib@cond@messagebreak%
-        Use false branch}%
+      \pgfkeys@error{Undefined \pgfkeys@lib@cond@backslashchar if#1 used by 
+        ``\pgfkeyscurrentkey=\detokenize{{#1}{#2}{#3}}''.\pgfkeys@lib@cond@messagebreak%
+        I'll use false branch}%
       \expandafter\@secondoftwo
     \fi
     {\pgfkeysalso{#2}}{\pgfkeysalso{#3}}%
   },
-  /utils/@ifxxx nTF/.code n args={3}{%
+  /utils/ifxxx nTF/.code n args={3}{%
     #1%
       \expandafter\pgfkeys@firstoftwo
     \else
@@ -22,11 +23,20 @@
     \fi
     {\pgfkeysalso{#2}}{\pgfkeysalso{#3}}%
   },
-  /utils/ifnum nnTF/.style n args={5}{
-    /utils/@ifxxx nTF={\ifnum\numexpr#1\relax#2\numexpr#3\relax}{#4}{#5}
+  /utils/ifnum nNnTF/.style n args={5}{
+    /utils/ifxxx nTF={\ifnum\numexpr#1\relax#2\numexpr#3\relax}{#4}{#5}
+  },
+  /utils/ifdim nNnTF/.style n args= {5}{
+    /utils/ifxxx nTF={\ifdim\dimexpr#1\relax#2\dimexpr#3\relax}{#4}{#5}
+  },
+  /utils/if NNTF/.style n args={4}{
+    /utils/ifxxx nTF={\if\noexpand#1\noexpand#2}{#3}{#4}
+  },
+  /utils/ifcat NNTF/.style n args={4}{
+    /utils/ifxxx nTF={\ifcat\noexpand#1\noexpand#2}{#3}{#4}
   },
   /utils/ifx NNTF/.style n args={4}{
-    /utils/@ifxxx nTF={\ifx#1#2}{#3}{#4}
+    /utils/ifxxx nTF={\ifx#1#2}{#3}{#4}
   }
 }
 
@@ -39,3 +49,41 @@
 \long\def\pgfkeys@lib@cond@gobble#1{}
 \edef\pgfkeys@lib@cond@backslashchar{%
   \expandafter\pgfkeys@lib@cond@gobble\string\\}
+
+% similar to \pgfsys@strcmp defined in pgfsys.code.tex
+\ifdefined\pdfstrcmp
+  \let\pgfkeys@lib@cond@strcmp=\pdfstrcmp
+\else\ifdefined\strcmp
+  \let\pgfkeys@lib@cond@strcmp=\strcmp
+\else\ifdefined\directlua
+  \directlua{
+    local lft = lua.get_functions_table()
+    lft[\string#lft+1] = function()
+        local lhs = token.scan_string()
+        local rhs = token.scan_string()
+        if lhs < rhs then
+            tex.sprint(-2, "-1")
+        elseif lhs == rhs then
+            tex.sprint(-2, "0")
+        else
+            tex.sprint(-2, "1")
+        end
+    end
+    token.set_lua("pgfkeys@lib@cond@strcmp", \string#lft, "global")
+  }
+\fi\fi\fi
+
+\ifdefined\pgfkeys@lib@cond@strcmp
+  \long\def\pgfkeys@lib@cond@strcmp@do#1#2{%
+    \pgfkeys@lib@cond@strcmp{\pgfkeys@unexpanded{#1}}{\pgfkeys@unexpanded{#2}}}
+  \pgfkeys{
+    /utils/if strcmp nNnTF/.style n args={5}{
+      /utils/ifxxx nTF={\ifnum\pgfkeys@lib@cond@strcmp@do{#1}{#3}#20\relax}{#4}{#5}
+    }
+  }
+  \pgfkeys@lib@cond@gobble\fi
+\else
+  \pgfkeys@error{%
+    No primitive \pgfkeys@lib@cond@backslashchar(pdf)strcmp found and I'm not in LuaTeX.\pgfkeys@lib@cond@messagebreak
+    ``/utils/if strcmp nNnTF'' is not provided}
+\fi

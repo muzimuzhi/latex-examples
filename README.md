@@ -27,18 +27,26 @@ Internals
  - modified
    - `\theFancyVerbLine`
 
-### [`conditionals`](utilities/pgfkeyslibraryconditionals.code.tex), a `pgfkeys` library (wip)
+### [`pgfkeys` library `conditionals`](utilities/pgfkeyslibraryconditionals.code.tex)
 
 User Interface
   - loading: `\usepgfkeyslibrary{conditionals}`
   - conditional keys
-    - `/utils/if nTF={<name>}{<true options>}{<false options>}`
+    - `/utils/ifname nTF={<name>}{<true options>}{<false options>}`
       executes `\if<name> ... \else ... \fi`
-    - `/utils/ifnum nnTF={<int expr a>}{<int expr b>}{<true options>}{<false options>}`
-    - `/utils/ifx NNTF=<token a><token b>{<true options>}{<false options>}`
+    - `/utils/ifxxx nTF={<ifxxx header>}{<true options>}{<false options>}`
+      executes `<ifxxx header> ... \else ... \fi`
+      - `/utils/ifnum nNnTF={<int expr a>}<relation>{<int expr b>}{<t>}{<f>}`
+        (trick: hide `<relation>` `=` in braces, like `/utils/ifnum 1{=}1tf`)
+      - `/utils/ifdim nNnTF={<dim expr a>}<relation>{<dim expr b>}{<t>}{<f>}`
+      - `/utils/if NNTF=<token a><token b>{<t>}{<f>}`
+        (`\noexpand` auto applied to `<tokan a>` and `<token b>`)
+      - `/utils/ifcat NNTF=<token a><token b>{<t>}{<f>}` (ditto)
+      - `/utils/ifx NNTF=<token a><token b>{<t>}{<f>}`
+      - `/utils/if strcmp nTnTF={<text a>}<relation>{<text b>}{<t>}{<f>}`
+        (`<text a/b>` are auto wrapped by `\unexpanded`; relies on primitive `\(pdf)strcmp` or its mock in Lua)
 
 Internals
-  - `/utils/@ifxxx nTF={<if expr>}{<true options>}{<false options>}`
   - prefix `\pgfkeys@lib@cond@xxx`
 
 TODO
