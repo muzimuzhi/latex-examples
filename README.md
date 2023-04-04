@@ -109,7 +109,7 @@ Internals
     - `\tikzNodeList`, A comma-separated list of elements `{<node_name>, <node_shape>}`
     - `\newif\iftikz@lib@automark@on`
 
-### [`unique-csname`](utilities/unique-csname.tex)
+### [`unique-csname.tex`](utilities/unique-csname.tex)
 
 User Interface
  - `\undefine<cs>` and `\undefinecs{<csname>}` un-define a control sequence locally
@@ -118,7 +118,7 @@ User Interface
 Internals
  - `\@uniquecsname@try` and `\@uniquecsname@generate`
 
-### [`xcolor-quick-variants.tex`](utilities/xcolor-quick-variants.tex)
+### [`xcolor-quick-variants.tex`](utilities/xcolor-quick-variants.tex) (wip)
 
 User Interface
  - `\defineqcolor{<name>}{<model>}{<spec>}`
