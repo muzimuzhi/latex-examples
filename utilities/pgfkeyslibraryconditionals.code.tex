@@ -1,0 +1,41 @@
+\pgfkeys{
+  /utils/if TF/.code n args={3}{%
+    \ifcsname if#1\endcsname
+      \pgfkeys@lib@cond@gobble\if % paired \ifxxx ... (\else ...) \fi to cheat TeX
+      \csname if#1\endcsname
+        \expandafter\expandafter\expandafter\@firstoftwo
+      \else
+        \expandafter\expandafter\expandafter\@secondoftwo
+      \fi
+    \else
+      \pgfkeys@error{``\pgfkeyscurrentkey=\detokenize{{#1}{#2}{#3}}'' uses undefined conditional \pgfkeys@lib@cond@backslashchar if#1.\pgfkeys@lib@cond@messagebreak%
+        Use false branch}%
+      \expandafter\@secondoftwo
+    \fi
+    {\pgfkeysalso{#2}}{\pgfkeysalso{#3}}%
+  },
+  /utils/@ifxxx TF/.code n args={3}{%
+    #1%
+      \expandafter\pgfkeys@firstoftwo
+    \else
+      \expandafter\pgfkeys@secondoftwo
+    \fi
+    {\pgfkeysalso{#2}}{\pgfkeysalso{#3}}%
+  },
+  /utils/ifnum TF/.style n args={5}{
+    /utils/@ifxxx TF={\ifnum\numexpr#1\relax#2\numexpr#3\relax}{#4}{#5}
+  },
+  /utils/ifx TF/.style n args={4}{
+    /utils/@ifxxx TF={\ifx#1#2}{#3}{#4}
+  }
+}
+
+\ifdefined\PackageError
+  \def\pgfkeys@lib@cond@messagebreak{\MessageBreak}
+\else
+  \def\pgfkeys@lib@cond@messagebreak{^^J}
+\fi
+
+\long\def\pgfkeys@lib@cond@gobble#1{}
+\edef\pgfkeys@lib@cond@backslashchar{%
+  \expandafter\pgfkeys@lib@cond@gobble\string\\}

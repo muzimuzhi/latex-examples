@@ -1,0 +1,87 @@
+\documentclass{article}
+\usepackage{pgfkeys}
+\usepgfkeyslibrary{conditionals}
+
+\makeatletter
+\newcount\c@tests@passed
+\newcount\c@tests@failed
+
+\ifdefined\PackageError
+  \def\tests@error#1{\errmessage{Package tests Error: #1}}%
+\else
+  \def\tests@error#1{\PackageError{tests}{#1}{}}%
+\fi
+
+\def\tests@text@true{true}
+\def\tests@text@false{false}
+
+\def\AssertTrueResult{%
+  \ifx\pgfkeysresult\tests@text@true
+    \global\advance\c@tests@passed by 1\relax
+  \else
+    \global\advance\c@tests@failed by 1\relax
+    \tests@error{%
+      expected: \detokenize\expandafter{\tests@text@true},
+      actual: \detokenize\expandafter{\pgfkeysresult}}%
+  \fi}
+\def\AssertFalseResult{%
+  \ifx\pgfkeysresult\tests@text@false
+    \global\advance\c@tests@passed by 1\relax
+  \else
+    \global\advance\c@tests@failed by 1\relax
+    \tests@error{%
+      expected: \detokenize\expandafter{\tests@text@false},
+      actual: \detokenize\expandafter{\pgfkeysresult}}%
+  \fi}
+
+\def\StatAsserts{%
+  Passed \the\c@tests@passed, failed \the\c@tests@failed.\par
+  \global\c@tests@passed=0\relax
+  \global\c@tests@failed=0\relax
+}
+
+\long\def\BeginUnitTests#1{%
+  Test ``\texttt{\detokenize{#1}}''\par%
+}
+\long\def\EndUnitTests{\StatAsserts\par\bigskip}
+\makeatother
+
+\begin{document}
+\parindent=0pt
+\pgfkeys{
+  /t/.code=\def\pgfkeysresult{true},
+  /f/.code=\def\pgfkeysresult{false},
+  /utils/t/.code=\def\pgfkeysresult{true},
+  /utils/f/.code=\def\pgfkeysresult{false}
+}
+
+\BeginUnitTests{/utils/if TF}
+  % undefined
+  \pgfkeys{/utils/if TF={abc}{t}{f}} \AssertFalseResult
+  % primitive
+  \pgfkeys{/utils/if TF={mmode}{t}{f}} \AssertFalseResult
+  % user-defined
+  \csname @tempswafalse\endcsname
+  \pgfkeys{/utils/if TF={@tempswa}{t}{f}} \AssertFalseResult
+  \csname @tempswatrue\endcsname
+  \pgfkeys{/utils/if TF={@tempswa}{t}{f}} \AssertTrueResult
+\EndUnitTests
+
+\BeginUnitTests{/utils/ifnum TF}
+  \pgfkeys{/utils/.cd,
+    ifnum TF={3}{=}{1+2}tf, exec=\AssertTrueResult,
+    ifnum TF={2*5}>{7/3}tf, exec=\AssertTrueResult
+  }
+\EndUnitTests
+
+\BeginUnitTests{/utils/ifx TF}
+  \pgfkeys{/utils/.cd,
+    ifx TF={a}{a}tf, exec=\AssertTrueResult,
+    ifx TF={a}{b}tf, exec=\AssertFalseResult,
+    ifx TF/.expanded={\relax}{\expandafter\noexpand\csname\endcsname}tf,
+    exec=\AssertTrueResult,
+    ifx TF=\undefined\label tf, exec=\AssertFalseResult
+  }
+\EndUnitTests
+
+\end{document}
