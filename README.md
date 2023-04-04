@@ -27,6 +27,24 @@ Internals
  - modified
    - `\theFancyVerbLine`
 
+### [`conditionals`](utilities/pgfkeyslibraryconditionals.code.tex), a `pgfkeys` library (wip)
+
+User Interface
+  - loading: `\usepgfkeyslibrary{conditionals}`
+  - conditional keys
+    - `/utils/if nTF={<name>}{<true options>}{<false options>}`
+      executes `\if<name> ... \else ... \fi`
+    - `/utils/ifnum nnTF={<int expr a>}{<int expr b>}{<true options>}{<false options>}`
+    - `/utils/ifx NNTF=<token a><token b>{<true options>}{<false options>}`
+
+Internals
+  - `/utils/@ifxxx nTF={<if expr>}{<true options>}{<false options>}`
+  - prefix `\pgfkeys@lib@cond@xxx`
+
+TODO
+  - export to other default paths\
+    to support uses like `\tcbset{ifnum TF=...}` with no need to set `\pgfkeys{/tcb/.see also={/utils}}`.  Also more space consumption for shorter time.
+    - utility to copy a key (need to learn if `filtered` library adds any internal sub-keys)
 
 ### [`hyperref-autonameref.tex`](utilities/hyperref-autonameref.tex)
 
@@ -57,25 +75,6 @@ User Interface
 Internals
  - `<macro>` is stored in new sub-key `.@store`, which will be cleared by `.initial`
  - for the above four handlers, `.@store` has higher precedence than the key itself (set by `.initial`)
-
- ### [`conditionals`](utilities/pgfkeyslibraryconditionals.code.tex), a `pgfkeys` library (wip)
-
-User Interface
-  - loading: `\usepgfkeyslibrary{conditionals}`
-  - A set of conditional keys that run one of two branches of option lists
-    - `/utils/if TF={<name>}{<true options>}{<false options>}`
-      executes `\if<name> ... \else ... \fi`
-    - `/utils/ifnum TF={<int expr a>}{<int expr b>}{<t>}{<f>}`
-    - `/utils/ifx TF=<token a><token b>{<t>}{<f>}`
-
-Internals
-  - `/utils/@ifxxx TF={<if expr>}{<true options>}{<false options>}`
-  - prefix `\pgfkeys@lib@cond@xxx`
-
-TODO
-  - export to other default paths\
-    to support uses like `\tcbset{ifnum TF=...}` with no need to set `\pgfkeys{/tcb/.see also={/utils}}`.  Also more space consumption for shorter time.
-    - utility to copy a key (need to learn if `filtered` library adds any internal sub-keys)
 
 ### [`print-definition.tex`](utilities/print-definition.tex)
 

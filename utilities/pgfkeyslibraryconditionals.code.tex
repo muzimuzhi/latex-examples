@@ -1,5 +1,5 @@
 \pgfkeys{
-  /utils/if TF/.code n args={3}{%
+  /utils/if nTF/.code n args={3}{%
     \ifcsname if#1\endcsname
       \pgfkeys@lib@cond@gobble\if % paired \ifxxx ... (\else ...) \fi to cheat TeX
       \csname if#1\endcsname
@@ -14,7 +14,7 @@
     \fi
     {\pgfkeysalso{#2}}{\pgfkeysalso{#3}}%
   },
-  /utils/@ifxxx TF/.code n args={3}{%
+  /utils/@ifxxx nTF/.code n args={3}{%
     #1%
       \expandafter\pgfkeys@firstoftwo
     \else
@@ -22,11 +22,11 @@
     \fi
     {\pgfkeysalso{#2}}{\pgfkeysalso{#3}}%
   },
-  /utils/ifnum TF/.style n args={5}{
-    /utils/@ifxxx TF={\ifnum\numexpr#1\relax#2\numexpr#3\relax}{#4}{#5}
+  /utils/ifnum nnTF/.style n args={5}{
+    /utils/@ifxxx nTF={\ifnum\numexpr#1\relax#2\numexpr#3\relax}{#4}{#5}
   },
-  /utils/ifx TF/.style n args={4}{
-    /utils/@ifxxx TF={\ifx#1#2}{#3}{#4}
+  /utils/ifx NNTF/.style n args={4}{
+    /utils/@ifxxx nTF={\ifx#1#2}{#3}{#4}
   }
 }
 

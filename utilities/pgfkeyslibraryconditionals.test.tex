@@ -55,32 +55,32 @@
   /utils/f/.code=\def\pgfkeysresult{false}
 }
 
-\BeginUnitTests{/utils/if TF}
+\BeginUnitTests{/utils/if nTF}
   % undefined
-  \pgfkeys{/utils/if TF={abc}{t}{f}} \AssertFalseResult
+  \pgfkeys{/utils/if nTF={abc}{t}{f}} \AssertFalseResult
   % primitive
-  \pgfkeys{/utils/if TF={mmode}{t}{f}} \AssertFalseResult
+  \pgfkeys{/utils/if nTF={mmode}{t}{f}} \AssertFalseResult
   % user-defined
   \csname @tempswafalse\endcsname
-  \pgfkeys{/utils/if TF={@tempswa}{t}{f}} \AssertFalseResult
+  \pgfkeys{/utils/if nTF={@tempswa}{t}{f}} \AssertFalseResult
   \csname @tempswatrue\endcsname
-  \pgfkeys{/utils/if TF={@tempswa}{t}{f}} \AssertTrueResult
+  \pgfkeys{/utils/if nTF={@tempswa}{t}{f}} \AssertTrueResult
 \EndUnitTests
 
-\BeginUnitTests{/utils/ifnum TF}
+\BeginUnitTests{/utils/ifnum nnTF}
   \pgfkeys{/utils/.cd,
-    ifnum TF={3}{=}{1+2}tf, exec=\AssertTrueResult,
-    ifnum TF={2*5}>{7/3}tf, exec=\AssertTrueResult
+    ifnum nnTF={3}{=}{1+2}tf, exec=\AssertTrueResult,
+    ifnum nnTF={2*5}>{7/3}tf, exec=\AssertTrueResult
   }
 \EndUnitTests
 
-\BeginUnitTests{/utils/ifx TF}
+\BeginUnitTests{/utils/ifx NNTF}
   \pgfkeys{/utils/.cd,
-    ifx TF={a}{a}tf, exec=\AssertTrueResult,
-    ifx TF={a}{b}tf, exec=\AssertFalseResult,
-    ifx TF/.expanded={\relax}{\expandafter\noexpand\csname\endcsname}tf,
+    ifx NNTF={a}{a}tf, exec=\AssertTrueResult,
+    ifx NNTF={a}{b}tf, exec=\AssertFalseResult,
+    ifx NNTF/.expanded={\relax}{\expandafter\noexpand\csname\endcsname}tf,
     exec=\AssertTrueResult,
-    ifx TF=\undefined\label tf, exec=\AssertFalseResult
+    ifx NNTF=\undefined\label tf, exec=\AssertFalseResult
   }
 \EndUnitTests
 
