@@ -100,6 +100,7 @@ User Interface
    - In the definition of the above styles and macro, `\tikzNodeName` and `\tikzNodeShape` can be used as placeholders of node name and shape, respectively.
 
 Initial values
+  - .
     ```tex
     \tikzset{
       every auto mark/.style={
