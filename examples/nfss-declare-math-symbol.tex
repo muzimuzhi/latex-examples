@@ -1,3 +1,5 @@
+% !TeX document-id = {c72bc354-4143-4099-bb9d-620c6e3f7b35}
+% !TeX TXS-program:compile = txs:///xelatex/{%.tex} -shell-escape "%.tex"
 \documentclass{ctexart}
 
 \DeclareSymbolFont{cnmath}{TU}{SongtiSCLight(0)}{m}{n}
@@ -16,19 +18,18 @@
   % \AtBeginDocument{
   %   \DeclareMathSymbol{,}{\mathpunct}{cnmath}{"2C}
   % }
-  
+
   \LARGE
   text mode: english, comma 中文，逗号\par
   math mode: $abc, abc$
 \end{example}
 
 \begin{example*}{Print current font info}
-  % ref: https://tex.stackexchange.com/a/303536/79060
+  % ref: https://tex.stackexchange.com/a/303536
   \newcommand{\printInternalCurrentFont}{%
-    \expandafter\ttfamily
-    \expandafter{\expandafter\string\the\font}%
+    \ExpandArgs{e}\texttt{\expandafter\string\the\font}%
   }
-  
+
   中文\printInternalCurrentFont
 \end{example*}
 
